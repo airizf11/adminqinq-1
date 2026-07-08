@@ -1,0 +1,6 @@
+# adminqinq/.dockerignore
+node_modules
+.next
+.git
+.env*
+npm-debug.log
