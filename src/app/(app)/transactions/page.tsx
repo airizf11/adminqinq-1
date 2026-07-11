@@ -1,6 +1,7 @@
 // adminqinq/src/app/(app)/transactions/page.tsx
 import { cotebek } from '@/lib/cotebek';
 import Link from 'next/link';
+import { FilterForm } from './FilterForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
@@ -41,13 +42,23 @@ const CATEGORY_LABEL: Record<string, string> = {
   OTHER: 'Lainnya',
 };
 
-export default async function TransactionsPage() {
-  const res = await cotebek<TransactionsResponse>('/transactions');
+export default async function TransactionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ startDate?: string; endDate?: string; type?: string }>;
+}) {
+  const params = await searchParams;
+  const qs = new URLSearchParams();
+  if (params.startDate) qs.set('startDate', params.startDate);
+  if (params.endDate) qs.set('endDate', params.endDate);
+  if (params.type) qs.set('type', params.type);
+
+  const res = await cotebek<TransactionsResponse>(`/transactions${qs.toString() ? `?${qs}` : ''}`);
   const { data } = res;
   const { summary } = res.meta;
 
   return (
-    <div className="p-4 pb-24 space-y-6">
+    <div className="p-4 pb-24 space-y-5">
       
       {/* 1. HEADER & TOMBOL CATAT */}
       <div className="flex justify-between items-end">
@@ -111,20 +122,23 @@ export default async function TransactionsPage() {
         </Card>
       </div>
 
-      {/* 3. EMPTY STATE */}
+      {/* 3. KOMPONEN FILTER TRANSAKSI */}
+      <FilterForm startDate={params.startDate} endDate={params.endDate} type={params.type} />
+
+      {/* 4. EMPTY STATE */}
       {data.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/30 rounded-2xl border border-dashed border-border mt-4">
+        <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/30 rounded-2xl border border-dashed border-border mt-2">
           <div className="w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4 shadow-sm">
             <ReceiptText className="text-muted-foreground opacity-50" size={32} aria-hidden="true" />
           </div>
-          <p className="text-foreground font-medium">Belum ada transaksi</p>
+          <p className="text-foreground font-medium">Tidak ada data</p>
           <p className="text-sm text-muted-foreground mt-1 max-w-[200px]">
-            Transaksi masuk dan keluar akan tampil di sini.
+            Cobalah ubah filter tanggal atau jenis transaksi Anda.
           </p>
         </div>
       )}
 
-      {/* 4. LIST TRANSAKSI */}
+      {/* 5. LIST TRANSAKSI */}
       <ul className="space-y-3" aria-label="Daftar Riwayat Transaksi">
         {data.map((tx) => {
           const isIncome = tx.type === 'IN';

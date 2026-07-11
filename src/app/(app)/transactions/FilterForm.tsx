@@ -1,0 +1,92 @@
+// adminqinq/src/app/(app)/transactions/FilterForm.tsx
+'use client';
+
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
+
+export function FilterForm({ startDate, endDate, type }: { startDate?: string; endDate?: string; type?: string }) {
+  // State untuk menampilkan/menyembunyikan form filter di HP agar tidak menuhi layar
+  const [isOpen, setIsOpen] = useState(!!startDate || !!endDate || !!type);
+
+  return (
+    <div className="w-full">
+      {/* Tombol Toggle Filter */}
+      <Button 
+        variant="outline" 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between h-10 border-dashed border-primary/40 text-primary hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer"
+      >
+        <div className="flex items-center gap-2">
+          <Filter size={16} /> 
+          <span className="text-sm font-semibold">
+            {isOpen ? 'Sembunyikan Filter' : 'Filter Transaksi'}
+          </span>
+        </div>
+        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </Button>
+
+      {/* Form Area */}
+      {isOpen && (
+        <form method="GET" className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          <Card className="border-border shadow-sm bg-muted/10">
+            <CardContent className="p-3 space-y-3">
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Dari Tanggal</Label>
+                  <Input 
+                    type="date" 
+                    name="startDate" 
+                    defaultValue={startDate} 
+                    className="h-10 text-xs bg-background" 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Sampai Tanggal</Label>
+                  <Input 
+                    type="date" 
+                    name="endDate" 
+                    defaultValue={endDate} 
+                    className="h-10 text-xs bg-background" 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Jenis Arus Kas</Label>
+                <Select name="type" defaultValue={type ?? ''}>
+                  <SelectTrigger className="h-10 bg-background text-sm">
+                    <SelectValue placeholder="Semua Jenis" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Semua Jenis (Masuk & Keluar)</SelectItem>
+                    <SelectItem value="IN" className="text-emerald-600 font-medium">Uang Masuk (IN)</SelectItem>
+                    <SelectItem value="OUT" className="text-destructive font-medium">Uang Keluar (OUT)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="pt-1">
+                <Button type="submit" className="w-full h-10 font-bold shadow-sm">
+                  Terapkan Filter
+                </Button>
+              </div>
+
+            </CardContent>
+          </Card>
+        </form>
+      )}
+    </div>
+  );
+}
