@@ -1,6 +1,20 @@
 // adminqinq/src/app/(app)/reports/page.tsx
 import { cotebek } from '@/lib/cotebek';
 import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { 
+  BarChart3, 
+  TrendingUp, 
+  Wallet, 
+  ShoppingCart, 
+  Receipt, 
+  ArrowRight, 
+  Medal, 
+  CreditCard,
+  Activity,
+  CalendarDays
+} from 'lucide-react';
 
 type Summary = { revenue: number; cogs: number; grossProfit: number; totalOrders: number };
 type TopItem = { itemName: string; totalSold: number };
@@ -15,6 +29,10 @@ function last30DaysRangeWIB() {
   startDate.setDate(startDate.getDate() - 29);
   const start = startDate.toISOString().slice(0, 10);
   return { start, end };
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 }
 
 export default async function ReportsPage() {
@@ -32,80 +50,186 @@ export default async function ReportsPage() {
   const topItems = topItemsRes.data;
   const trend = trendRes.data;
   const payments = paymentRes.data;
+  
+  // Ambil nilai tertinggi untuk mentransformasi grafik CSS
   const maxRevenue = Math.max(1, ...trend.map((t) => t.revenue));
 
   return (
-    <div className="p-4 pb-8">
-      <h1 className="text-lg font-semibold mb-1">Laporan</h1>
-      <p className="text-xs text-gray-500 mb-4">30 hari terakhir ({start} s/d {end})</p>
-
-      <Link href="/reports/advanced" className="text-sm text-blue-600 mb-4 inline-block">
-+       Lihat laporan lebih detail (filter tanggal, compare periode) →
-+     </Link>
-
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="border rounded-lg p-3">
-          <div className="text-xs text-gray-500">Omzet</div>
-          <div className="text-base font-semibold text-green-600">Rp{summary.revenue.toLocaleString('id-ID')}</div>
-        </div>
-        <div className="border rounded-lg p-3">
-          <div className="text-xs text-gray-500">Laba Kotor</div>
-          <div className="text-base font-semibold">Rp{summary.grossProfit.toLocaleString('id-ID')}</div>
-        </div>
-        <div className="border rounded-lg p-3">
-          <div className="text-xs text-gray-500">Modal (COGS)</div>
-          <div className="text-base font-semibold text-gray-600">Rp{summary.cogs.toLocaleString('id-ID')}</div>
-        </div>
-        <div className="border rounded-lg p-3">
-          <div className="text-xs text-gray-500">Total Order</div>
-          <div className="text-base font-semibold">{summary.totalOrders}</div>
+    <div className="p-4 pb-24 space-y-6">
+      
+      {/* 1. HEADER & PERIODE */}
+      <div className="mb-2">
+        <h1 className="text-2xl font-heading font-bold text-primary tracking-tight">Laporan Keuangan</h1>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
+          <CalendarDays size={14} />
+          <span>30 Hari Terakhir ({formatDate(start)} - {formatDate(end)})</span>
         </div>
       </div>
 
-      <h2 className="text-sm font-medium text-gray-600 mb-2">Tren Penjualan Harian</h2>
-      {trend.length === 0 ? (
-        <p className="text-sm text-gray-400 mb-4">Belum ada data.</p>
-      ) : (
-        <div className="border rounded-lg p-3 mb-4 space-y-1.5">
-          {trend.map((t) => (
-            <div key={t.date} className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 w-20 shrink-0">{t.date.slice(5)}</span>
-              <div className="flex-1 bg-gray-100 rounded h-4 relative overflow-hidden">
-                <div className="bg-green-600 h-full rounded" style={{ width: `${(t.revenue / maxRevenue) * 100}%` }} />
+      {/* 2. ADVANCED REPORTS BANNER */}
+      <Link href="/reports/advanced" className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
+        <Card className="bg-primary/5 border-primary/20 hover:bg-primary/10 hover:border-primary/30 transition-all shadow-sm group">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 text-primary rounded-lg" aria-hidden="true">
+                <BarChart3 size={20} />
               </div>
-              <span className="text-xs font-medium w-20 text-right shrink-0">Rp{t.revenue.toLocaleString('id-ID')}</span>
+              <div>
+                <div className="font-bold text-primary text-sm">Laporan Mendalam</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Filter tanggal & komparasi periode</div>
+              </div>
             </div>
-          ))}
-        </div>
-      )}
+            <ArrowRight size={18} className="text-primary/50 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+          </CardContent>
+        </Card>
+      </Link>
 
-      <h2 className="text-sm font-medium text-gray-600 mb-2">Layanan Terlaris</h2>
-      {topItems.length === 0 ? (
-        <p className="text-sm text-gray-400 mb-4">Belum ada data.</p>
-      ) : (
-        <ul className="space-y-2 mb-4">
-          {topItems.map((item, i) => (
-            <li key={item.itemName} className="border rounded-lg p-3 flex justify-between items-center">
-              <span className="text-sm">{i + 1}. {item.itemName}</span>
-              <span className="text-sm font-medium">{item.totalSold}x</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* 3. SUMMARY CARDS */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-emerald-600 mb-1">
+              <TrendingUp size={14} />
+              <div className="text-xs font-semibold uppercase tracking-wider">Omzet</div>
+            </div>
+            <div className="text-lg font-bold text-emerald-700">Rp{summary.revenue.toLocaleString('id-ID')}</div>
+          </CardContent>
+        </Card>
 
-      <h2 className="text-sm font-medium text-gray-600 mb-2">Metode Bayar</h2>
-      {payments.length === 0 ? (
-        <p className="text-sm text-gray-400">Belum ada data.</p>
-      ) : (
-        <ul className="space-y-2">
-          {payments.map((p) => (
-            <li key={p.method} className="border rounded-lg p-3 flex justify-between items-center">
-              <span className="text-sm">{p.method}</span>
-              <span className="text-sm text-gray-500">{p.count}x · {p.percentage}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+        <Card className="shadow-sm border-blue-200 bg-blue-50/30">
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-blue-600 mb-1">
+              <Wallet size={14} />
+              <div className="text-xs font-semibold uppercase tracking-wider">Laba Kotor</div>
+            </div>
+            <div className="text-lg font-bold text-blue-700">Rp{summary.grossProfit.toLocaleString('id-ID')}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm border-border bg-muted/10">
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+              <ShoppingCart size={14} />
+              <div className="text-xs font-semibold uppercase tracking-wider">Modal (COGS)</div>
+            </div>
+            <div className="text-lg font-bold text-foreground">Rp{summary.cogs.toLocaleString('id-ID')}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm border-purple-200 bg-purple-50/30">
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-purple-600 mb-1">
+              <Receipt size={14} />
+              <div className="text-xs font-semibold uppercase tracking-wider">Total Order</div>
+            </div>
+            <div className="text-lg font-bold text-purple-700">{summary.totalOrders} <span className="text-xs font-normal opacity-70">nota</span></div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 4. TREN PENJUALAN HARIAN */}
+      <Card className="shadow-sm border-border">
+        <CardHeader className="pb-3 pt-5 px-4 border-b border-border/50">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Activity size={16} className="text-emerald-600" /> Tren Penjualan Harian
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          {trend.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Belum ada data tren penjualan.</p>
+          ) : (
+            <div className="space-y-3">
+              {trend.map((t) => {
+                const percentage = (t.revenue / maxRevenue) * 100;
+                return (
+                  <div key={t.date} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-12 shrink-0">{formatDate(t.date)}</span>
+                    <div className="flex-1 bg-muted rounded-full h-5 relative overflow-hidden flex items-center">
+                      <div 
+                        className="bg-emerald-500 h-full rounded-r-full transition-all duration-1000 ease-out" 
+                        style={{ width: `${Math.max(percentage, 2)}%` }} 
+                      />
+                    </div>
+                    <span className="text-xs font-bold w-[75px] text-right shrink-0">
+                      {t.revenue > 0 ? `Rp${(t.revenue / 1000).toLocaleString('id-ID')}k` : '0'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 5. LAYANAN TERLARIS */}
+      <Card className="shadow-sm border-border">
+        <CardHeader className="pb-3 pt-5 px-4 border-b border-border/50">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Medal size={16} className="text-amber-500" /> Layanan Terlaris
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {topItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">Belum ada data layanan.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {topItems.map((item, i) => (
+                <li key={item.itemName} className="flex justify-between items-center p-4 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
+                      i === 0 ? "bg-amber-100 text-amber-700" : 
+                      i === 1 ? "bg-slate-100 text-slate-700" : 
+                      i === 2 ? "bg-orange-100 text-orange-800" : 
+                      "bg-muted text-muted-foreground"
+                    )}>
+                      {i + 1}
+                    </div>
+                    <span className="text-sm font-medium">{item.itemName}</span>
+                  </div>
+                  <span className="text-sm font-bold bg-muted px-2 py-1 rounded-md">{item.totalSold}x</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 6. METODE BAYAR */}
+      <Card className="shadow-sm border-border">
+        <CardHeader className="pb-3 pt-5 px-4 border-b border-border/50">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <CreditCard size={16} className="text-blue-600" /> Metode Bayar
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          {payments.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Belum ada data pembayaran.</p>
+          ) : (
+            <ul className="space-y-4">
+              {payments.map((p) => {
+                const pctValue = parseFloat(p.percentage);
+                return (
+                  <li key={p.method} className="relative">
+                    <div className="flex justify-between items-end mb-1.5 relative z-10">
+                      <span className="text-sm font-medium">{p.method}</span>
+                      <div className="text-right">
+                        <span className="text-xs font-bold">{p.percentage}</span>
+                        <span className="text-[10px] text-muted-foreground ml-1.5">({p.count}x)</span>
+                      </div>
+                    </div>
+                    {/* Visual Progress Bar di bawah teks */}
+                    <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-blue-500 h-full rounded-full" style={{ width: `${pctValue}%` }} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

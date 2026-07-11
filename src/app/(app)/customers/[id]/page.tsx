@@ -2,6 +2,22 @@
 import Link from 'next/link';
 import { cotebek } from '@/lib/cotebek';
 import { DeleteButton } from './DeleteButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { 
+  ArrowLeft, 
+  Edit, 
+  User, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  StickyNote, 
+  ReceiptText,
+  ChevronRight,
+  ShoppingBag
+} from 'lucide-react';
 
 type OrderHistoryItem = { id: string; orderNumber: string; status: string; totalAmount: number };
 type CustomerDetail = {
@@ -10,8 +26,13 @@ type CustomerDetail = {
   notes: string | null; orderHistory: OrderHistoryItem[];
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  RECEIVED: 'Diterima', IN_PROCESS: 'Diproses', READY: 'Siap Diambil', DONE: 'Selesai', CANCELLED: 'Dibatalkan',
+// Kita samakan warnanya dengan halaman Order agar konsisten
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  RECEIVED: { label: 'Diterima', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  IN_PROCESS: { label: 'Diproses', color: 'bg-primary/10 text-primary border-primary/20' },
+  READY: { label: 'Siap Diambil', color: 'bg-secondary/20 text-secondary-foreground border-secondary/30' },
+  DONE: { label: 'Selesai', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  CANCELLED: { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,55 +40,151 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const res = await cotebek<{ data: CustomerDetail }>(`/customers/${id}`);
   const c = res.data;
 
+  const fullAddress = [c.addressDetail, c.city, c.province].filter(Boolean).join(', ');
+
   return (
-    <div className="p-4 pb-8">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h1 className="text-lg font-semibold">{c.name}</h1>
-          <p className="text-sm text-gray-500">{c.phone}</p>
+    <div className="p-4 pb-24 space-y-6">
+      
+      {/* 1. TOP NAVIGATION */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link 
+            href="/customers" 
+            className="p-2 -ml-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Kembali ke daftar pelanggan"
+          >
+            <ArrowLeft size={20} aria-hidden="true" />
+          </Link>
+          <h1 className="text-xl font-heading font-bold text-foreground tracking-tight">
+            Profil Pelanggan
+          </h1>
         </div>
-        <Link href={`/customers/${c.id}/edit`} className="text-sm border rounded-lg px-3 py-1.5">Edit</Link>
+        <Link 
+          href={`/customers/${c.id}/edit`} 
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-8 px-3 rounded-full")}
+        >
+          <Edit size={14} className="mr-1.5" aria-hidden="true" /> Edit
+        </Link>
       </div>
 
-      {(c.email || c.addressDetail || c.city) && (
-        <div className="border rounded-lg p-3 mb-4 space-y-1 text-sm">
-          {c.email && <div className="flex justify-between"><span className="text-gray-500">Email</span><span>{c.email}</span></div>}
-          {(c.addressDetail || c.city) && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Alamat</span>
-              <span className="text-right">{[c.addressDetail, c.city, c.province].filter(Boolean).join(', ')}</span>
-            </div>
-          )}
+      {/* 2. HERO PROFILE */}
+      <div className="flex flex-col items-center text-center space-y-3 pt-2 pb-4">
+        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary shadow-sm border border-primary/20" aria-hidden="true">
+          <User size={32} />
         </div>
-      )}
-
-      {c.notes && (
-        <div className="border rounded-lg p-3 mb-4 text-sm">
-          <div className="text-gray-500 mb-1">Catatan</div>
-          <div>{c.notes}</div>
+        <div>
+          <h2 className="text-2xl font-bold text-foreground tracking-tight">{c.name}</h2>
+          <div className="flex items-center justify-center gap-1.5 text-muted-foreground mt-1 text-sm font-medium">
+            <Phone size={14} aria-hidden="true" /> 
+            <span>{c.phone}</span>
+          </div>
         </div>
-      )}
+      </div>
 
-      <h2 className="text-sm font-medium text-gray-600 mb-2">Riwayat Order</h2>
-      {c.orderHistory.length === 0 ? (
-        <p className="text-sm text-gray-400 mb-4">Belum ada order.</p>
-      ) : (
-        <ul className="space-y-2 mb-4">
-          {c.orderHistory.map((o) => (
-            <li key={o.id}>
-              <Link href={`/orders/${o.id}`} className="border rounded-lg p-3 flex justify-between items-center block">
-                <div>
-                  <div className="font-medium text-sm">{o.orderNumber}</div>
-                  <div className="text-xs text-gray-500">{STATUS_LABEL[o.status] ?? o.status}</div>
+      {/* 3. DETAIL KONTAK & ALAMAT */}
+      {(c.email || fullAddress || c.notes) && (
+        <Card className="shadow-sm border-border">
+          <CardContent className="p-4 space-y-4 text-sm">
+            
+            {(c.email || fullAddress) && (
+              <dl className="space-y-3">
+                {c.email && (
+                  <div className="flex items-start gap-3">
+                    <Mail size={16} className="text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
+                    <div className="flex-1">
+                      <dt className="sr-only">Email</dt>
+                      <dd className="font-medium text-foreground">{c.email}</dd>
+                    </div>
+                  </div>
+                )}
+                {fullAddress && (
+                  <div className="flex items-start gap-3">
+                    <MapPin size={16} className="text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
+                    <div className="flex-1">
+                      <dt className="text-xs text-muted-foreground mb-0.5 block">Alamat Pengiriman</dt>
+                      <dd className="font-medium text-foreground leading-relaxed">{fullAddress}</dd>
+                    </div>
+                  </div>
+                )}
+              </dl>
+            )}
+
+            {c.notes && (
+              <div className={cn(
+                "p-3 rounded-lg text-sm",
+                (c.email || fullAddress) ? "bg-yellow-50/50 border border-yellow-100" : ""
+              )}>
+                <div className="flex items-center gap-1.5 text-yellow-700 font-semibold text-xs uppercase tracking-wider mb-1">
+                  <StickyNote size={14} aria-hidden="true" /> Catatan Khusus
                 </div>
-                <div className="text-sm font-medium">Rp{o.totalAmount.toLocaleString('id-ID')}</div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                <p className="text-yellow-900 italic leading-relaxed">"{c.notes}"</p>
+              </div>
+            )}
+
+          </CardContent>
+        </Card>
       )}
 
-      <DeleteButton customerId={c.id} hasOrders={c.orderHistory.length > 0} />
+      {/* 4. RIWAYAT ORDER */}
+      <div className="space-y-3 pt-2">
+        <h2 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground px-1">
+          <ReceiptText size={16} aria-hidden="true" /> Riwayat Order ({c.orderHistory.length})
+        </h2>
+
+        {c.orderHistory.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/30 rounded-xl border border-dashed border-border">
+            <ShoppingBag className="text-muted-foreground opacity-30 mb-2" size={28} aria-hidden="true" />
+            <p className="text-sm text-muted-foreground">Belum ada riwayat transaksi.</p>
+          </div>
+        ) : (
+          <ul className="space-y-2" aria-label="Daftar riwayat order">
+            {c.orderHistory.map((o) => {
+              const statusVisual = STATUS_CONFIG[o.status] || { label: o.status, color: 'bg-gray-100 text-gray-700 border-gray-200' };
+
+              return (
+                <li key={o.id}>
+                  <Card className="relative group shadow-sm border-border hover:border-primary/40 hover:shadow-md transition-all duration-200">
+                    <CardContent className="p-3.5 flex justify-between items-center gap-3">
+                      
+                      <div className="flex-1 min-w-0">
+                        {/* Area Klik (Hitbox) merentang seluas Card */}
+                        <Link 
+                          href={`/orders/${o.id}`} 
+                          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm before:absolute before:inset-0 text-sm font-bold text-foreground truncate block mb-1"
+                        >
+                          {o.orderNumber}
+                        </Link>
+                        
+                        <div className="flex items-center gap-2 relative z-10 pointer-events-none">
+                          <Badge variant="outline" className={cn("text-[10px] px-2 py-0 shadow-none font-medium", statusVisual.color)}>
+                            {statusVisual.label}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0 relative z-10 pointer-events-none">
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-primary">
+                            Rp{o.totalAmount.toLocaleString('id-ID')}
+                          </div>
+                        </div>
+                        <ChevronRight size={18} className="text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all" aria-hidden="true" />
+                      </div>
+
+                    </CardContent>
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      {/* 5. DANGER ZONE (HAPUS PELANGGAN) */}
+      <div className="pt-8 mt-8 border-t border-dashed border-destructive/20">
+        <DeleteButton customerId={c.id} hasOrders={c.orderHistory.length > 0} />
+      </div>
+
     </div>
   );
 }

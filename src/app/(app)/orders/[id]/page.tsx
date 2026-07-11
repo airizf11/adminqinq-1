@@ -1,8 +1,19 @@
 // adminqinq/src/app/(app)/orders/[id]/page.tsx
 import { cotebek } from '@/lib/cotebek';
-import { StatusActions } from './StatusActions';
 import Link from 'next/link';
-import { WhatsAppUpdateButton } from './WhatsAppUpdateButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { 
+  ArrowLeft, 
+  ReceiptText, 
+  UserCircle, 
+  CalendarClock, 
+  CreditCard,
+  Printer
+} from 'lucide-react';
+import { OrderActionButtons } from './OrderActionButtons';
 
 type OrderItem = { id: string; itemName: string; qty: number; subtotal: number };
 type OrderDetail = {
@@ -15,19 +26,21 @@ type OrderDetail = {
   paymentMethod: string;
   items: OrderItem[];
   customerName: string | null;
- customerPhone: string | null;
- handledByName: string | null;
- createdAt: string;
- promoCode: string | null;
- dueDate: string | null;
+  customerPhone: string | null;
+  handledByName: string | null;
+  promoCode: string | null;
+  dueDate: string | null;
+  metadata: { note?: string } | null;
+  createdAt: string;
+  paymentStatus: 'PAID' | 'UNPAID';
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  RECEIVED: 'Diterima',
-  IN_PROCESS: 'Diproses',
-  READY: 'Siap Diambil',
-  DONE: 'Selesai',
-  CANCELLED: 'Dibatalkan',
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  RECEIVED: { label: 'Diterima', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200' },
+  IN_PROCESS: { label: 'Diproses', color: 'bg-primary/10 text-primary hover:bg-primary/20 border-primary/20' },
+  READY: { label: 'Siap Diambil', color: 'bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 border-secondary/30' },
+  DONE: { label: 'Selesai', color: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-emerald-200' },
+  CANCELLED: { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20' },
 };
 
 type TrackingData = { statusHistory: { status: string | null; timestamp: string }[] };
@@ -38,85 +51,191 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const order = res.data;
 
   const trackRes = await cotebek<{ data: TrackingData }>(`/orders/track/${order.orderNumber}`);
- const statusHistory = trackRes.data.statusHistory;
+  const statusHistory = trackRes.data.statusHistory;
+
+  const statusVisual = STATUS_CONFIG[order.status] || { label: order.status, color: 'bg-gray-100 text-gray-700' };
 
   return (
-    <div className="p-4 pb-8">
-      <h1 className="text-lg font-semibold mb-1">{order.orderNumber}</h1>
-      <span className="inline-block text-xs bg-gray-100 rounded-full px-3 py-1 mb-4">
-        {STATUS_LABEL[order.status] ?? order.status}
-      </span>
-
-      <div className="border rounded-lg p-3 mb-4 space-y-1 text-sm">
-       <div className="flex justify-between">
-         <span className="text-gray-500">Customer</span>
-         <span>{order.customerName ?? 'Walk-in / tanpa data'}</span>
-       </div>
-       {order.customerPhone && (
-         <div className="flex justify-between">
-           <span className="text-gray-500">No. HP</span>
-           <span>{order.customerPhone}</span>
-         </div>
-       )}
-       <div className="flex justify-between">
-         <span className="text-gray-500">Ditangani</span>
-         <span>{order.handledByName ?? '-'}</span>
-       </div>
-       {order.dueDate && (
-         <div className="flex justify-between">
-           <span className="text-gray-500">Estimasi Selesai</span>
-           <span>{new Date(order.dueDate).toLocaleDateString('id-ID')}</span>
-         </div>
-       )}
-     </div>
-
-      <div className="border rounded-lg p-3 mb-4">
-        <h2 className="text-sm font-medium text-gray-600 mb-2">Item</h2>
-        <ul className="space-y-1">
-          {order.items.map((i) => (
-            <li key={i.id} className="flex justify-between text-sm">
-              <span>{i.itemName} x{i.qty}</span>
-              <span>Rp{i.subtotal.toLocaleString('id-ID')}</span>
-            </li>
-          ))}
-        </ul>
+    <div className="p-4 pb-24 space-y-5">
+      
+      {/* 1. TOP NAVIGATION / HEADER */}
+      <div className="flex items-center gap-3">
+        <Link 
+          href="/orders" 
+          className="p-2 -ml-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft size={20} />
+        </Link>
+        <div>
+          <h1 className="text-xl font-heading font-bold text-foreground tracking-tight">
+            {order.orderNumber}
+          </h1>
+        </div>
       </div>
 
-      <div className="border rounded-lg p-3 mb-4 space-y-1 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-500">Subtotal</span>
-          <span>Rp{order.totalAmount.toLocaleString('id-ID')}</span>
-        </div>
-        {order.discountAmount > 0 && (
-          <div className="flex justify-between text-green-600">
-            <span>Diskon{order.promoCode ? ` (${order.promoCode})` : ''}</span>
-            <span>-Rp{order.discountAmount.toLocaleString('id-ID')}</span>
-          </div>
+      {/* 2. STATUS ROW */}
+      <div className="flex gap-2 items-center">
+        <Badge variant="outline" className={cn("px-3 py-1 font-medium", statusVisual.color)}>
+          {statusVisual.label}
+        </Badge>
+        {order.paymentStatus === 'PAID' ? (
+          <Badge variant="outline" className="px-3 py-1 font-medium bg-emerald-50 text-emerald-700 border-emerald-200">
+            Lunas
+          </Badge>
+        ) : (
+          <Badge variant="destructive" className="px-3 py-1 font-medium shadow-none">
+            Belum Lunas
+          </Badge>
         )}
-        <div className="flex justify-between font-semibold border-t pt-1">
-          <span>Total</span>
-          <span>Rp{order.finalAmount.toLocaleString('id-ID')}</span>
-        </div>
-        <div className="flex justify-between text-gray-500 text-xs pt-1">
-          <span>Metode Bayar</span>
-          <span>{order.paymentMethod}</span>
-        </div>
       </div>
 
-      <StatusActions orderId={order.id} currentStatus={order.status} />
+      {/* 3. INFO CUSTOMER & TANGGAL */}
+      <Card className="shadow-sm">
+        <CardContent className="p-4 space-y-3 text-sm">
+          <div className="flex items-start gap-3">
+            <UserCircle className="text-muted-foreground shrink-0 mt-0.5" size={18} />
+            <div className="flex-1 space-y-0.5">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Pelanggan</span>
+                <span className="font-medium text-right">{order.customerName ?? 'Walk-in'}</span>
+              </div>
+              {order.customerPhone && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">No. HP</span>
+                  <span className="text-right">{order.customerPhone}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="h-px bg-border w-full" />
 
-      <WhatsAppUpdateButton
-       customerName={order.customerName}
-       customerPhone={order.customerPhone}
-       orderNumber={order.orderNumber}
-       createdAt={order.createdAt}
-       currentStatus={order.status}
-       statusHistory={statusHistory}
-     />
+          <div className="flex items-start gap-3">
+            <CalendarClock className="text-muted-foreground shrink-0 mt-0.5" size={18} />
+            <div className="flex-1 space-y-0.5">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tgl Order</span>
+                <span className="text-right">{new Date(order.createdAt).toLocaleDateString('id-ID')}</span>
+              </div>
+              {order.dueDate && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Est. Selesai</span>
+                  <span className="text-right font-medium text-primary">
+                    {new Date(order.dueDate).toLocaleDateString('id-ID')}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <Link href={`/orders/${order.id}/receipt`} className="block text-center text-sm text-blue-600 mt-3">
-+       Lihat / Cetak Struk
-+     </Link>
+      {/* 4. ITEMS ORDER */}
+      <Card className="shadow-sm">
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+            <ReceiptText size={16} /> Rincian Item
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          <ul className="space-y-2 mb-3">
+            {order.items.map((i) => (
+              <li key={i.id} className="flex justify-between text-sm">
+                <span className="text-foreground">
+                  {i.itemName} <span className="text-muted-foreground ml-1">x{i.qty}</span>
+                </span>
+                <span className="font-medium">Rp{i.subtotal.toLocaleString('id-ID')}</span>
+              </li>
+            ))}
+          </ul>
+          
+          {/* Garis Pemisah Bill */}
+          <div className="border-t border-dashed border-border pt-3 space-y-1.5 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span>Rp{order.totalAmount.toLocaleString('id-ID')}</span>
+            </div>
+            {order.discountAmount > 0 && (
+              <div className="flex justify-between text-emerald-600">
+                <span>Diskon {order.promoCode && `(${order.promoCode})`}</span>
+                <span>-Rp{order.discountAmount.toLocaleString('id-ID')}</span>
+              </div>
+            )}
+            
+            <div className="flex justify-between items-center pt-2 mt-2 border-t border-border">
+              <span className="font-semibold text-foreground">Total Tagihan</span>
+              <span className="text-lg font-bold text-primary">
+                Rp{order.finalAmount.toLocaleString('id-ID')}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 5. INFO PEMBAYARAN & CATATAN */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="shadow-sm bg-muted/30 border-dashed">
+          <CardContent className="p-3 flex flex-col justify-center items-center text-center gap-1">
+            <CreditCard size={18} className="text-muted-foreground mb-1" />
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+              Metode Bayar
+            </div>
+            <div className="text-sm font-medium text-foreground">
+              {order.paymentMethod}
+            </div>
+          </CardContent>
+        </Card>
+
+        {order.metadata?.note ? (
+          <Card className="shadow-sm bg-yellow-50/50 border-yellow-200">
+            <CardContent className="p-3">
+              <div className="text-[10px] text-yellow-700 uppercase tracking-wider font-semibold mb-1">
+                Catatan
+              </div>
+              <div className="text-xs text-yellow-900 leading-relaxed italic">
+                "{order.metadata.note}"
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="shadow-sm bg-muted/30 border-dashed">
+            <CardContent className="p-3 flex flex-col justify-center items-center text-center h-full">
+              <div className="text-xs text-muted-foreground opacity-70">
+                Tidak ada catatan
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* 6. ACTION BUTTONS AREA */}
+      <div className="space-y-3 pt-4 border-t border-border">
+        
+        {/* Panggil komponen Gabungan kita di sini! */}
+        <OrderActionButtons 
+          orderId={order.id}
+          currentStatus={order.status}
+          paymentStatus={order.paymentStatus}
+          defaultPaymentMethod={order.paymentMethod}
+          customerName={order.customerName}
+          customerPhone={order.customerPhone}
+          orderNumber={order.orderNumber}
+          createdAt={order.createdAt}
+          statusHistory={statusHistory}
+        />
+
+        {/* Tombol Cetak Struk */}
+        <Link 
+          href={`/orders/${order.id}/receipt`} 
+          className={cn(
+            buttonVariants({ variant: "outline", className: "w-full flex items-center justify-center gap-2 h-11" })
+          )}
+        >
+          <Printer size={18} className="text-muted-foreground" />
+          Lihat / Cetak Struk
+        </Link>
+      </div>
+
     </div>
   );
 }

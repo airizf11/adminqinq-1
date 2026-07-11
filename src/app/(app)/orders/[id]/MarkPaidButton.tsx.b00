@@ -1,0 +1,46 @@
+// adminqinq/src/app/(app)/orders/[id]/MarkPaidButton.tsx
+'use client';
+
+import { useState } from 'react';
+import { markOrderPaid } from './actions';
+
+const PAYMENT_METHODS = ['Tunai', 'Transfer Bank', 'QRIS', 'E-Wallet'];
+
+export function MarkPaidButton({ orderId, defaultPaymentMethod }: { orderId: string; defaultPaymentMethod: string }) {
+  const [method, setMethod] = useState(defaultPaymentMethod || PAYMENT_METHODS[0]);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  async function handleConfirm() {
+    setPending(true);
+    setError(null);
+    const result = await markOrderPaid(orderId, method);
+    setPending(false);
+    if (result?.error) setError(result.error);
+  }
+
+  if (!expanded) {
+    return (
+      <button onClick={() => setExpanded(true)} className="w-full bg-yellow-500 text-white rounded-lg p-3 font-medium mb-3">
+        Tandai Lunas
+      </button>
+    );
+  }
+
+  return (
+    <div className="border rounded-lg p-3 mb-3 space-y-2">
+      <label className="text-sm text-gray-600 block">Metode Bayar</label>
+      <select value={method} onChange={(e) => setMethod(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm">
+        {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
+      </select>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      <div className="flex gap-2">
+        <button onClick={() => setExpanded(false)} className="flex-1 border rounded-lg p-2 text-sm">Batal</button>
+        <button onClick={handleConfirm} disabled={pending} className="flex-1 bg-yellow-500 text-white rounded-lg p-2 text-sm font-medium disabled:opacity-50">
+          {pending ? 'Menyimpan...' : 'Konfirmasi Lunas'}
+        </button>
+      </div>
+    </div>
+  );
+}

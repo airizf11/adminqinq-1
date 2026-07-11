@@ -24,22 +24,22 @@ export default function NewCustomerPage() {
         {/* Data utama */}
         <div>
           <label className="text-sm text-gray-600 block mb-1">Nama *</label>
-          <input name="name" required minLength={2} maxLength={100} className="w-full border rounded-lg p-2.5" placeholder="Budi Santoso" />
+          <input name="name" required minLength={2} maxLength={100} className="w-full border rounded-lg p-2.5" placeholder="Cth: Budi Santoso" />
         </div>
 
         <div>
           <label className="text-sm text-gray-600 block mb-1">No. HP</label>
-          <input name="phone" type="tel" className="w-full border rounded-lg p-2.5" placeholder="08123456789" />
+          <input name="phone" type="tel" className="w-full border rounded-lg p-2.5" placeholder="Cth: 08123456789" />
         </div>
 
         <div>
           <label className="text-sm text-gray-600 block mb-1">Email</label>
-          <input name="email" type="email" className="w-full border rounded-lg p-2.5" placeholder="budi@email.com" />
+          <input name="email" type="email" className="w-full border rounded-lg p-2.5" placeholder="Cth: budi@email.com" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-sm text-gray-600 block mb-1">Jenis Kelamin</label>
+            <label className="text-sm text-gray-600 block mb-1">Jenis Kelamin *</label>
             <select name="gender" className="w-full border rounded-lg p-2.5">
               <option value="">-</option>
               <option value="MALE">Laki-laki</option>
@@ -59,7 +59,7 @@ export default function NewCustomerPage() {
 
         <div>
           <label className="text-sm text-gray-600 block mb-1">Detail Alamat</label>
-          <input name="addressDetail" maxLength={255} className="w-full border rounded-lg p-2.5" placeholder="Jl. Merdeka No. 10, RT 02/RW 05" />
+          <input name="addressDetail" maxLength={255} className="w-full border rounded-lg p-2.5" placeholder="Cth: Jl. Merdeka No. 10, RT 02/RW 05" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -86,7 +86,7 @@ export default function NewCustomerPage() {
 
         <div>
           <label className="text-sm text-gray-600 block mb-1">Kode Pos</label>
-          <input name="postalCode" maxLength={5} pattern="\d{5}" className="w-full border rounded-lg p-2.5" placeholder="68118" />
+          <input name="postalCode" maxLength={5} pattern="\d{5}" className="w-full border rounded-lg p-2.5" placeholder="Cth: 68118" />
         </div>
 
         {/* Lainnya */}
@@ -94,12 +94,12 @@ export default function NewCustomerPage() {
 
         <div>
           <label className="text-sm text-gray-600 block mb-1">Tags (pisah koma)</label>
-          <input name="tags" className="w-full border rounded-lg p-2.5" placeholder="langganan, VIP" />
+          <input name="tags" className="w-full border rounded-lg p-2.5" placeholder="Cth: langganan, VIP" />
         </div>
 
         <div>
           <label className="text-sm text-gray-600 block mb-1">Catatan</label>
-          <textarea name="notes" rows={3} className="w-full border rounded-lg p-2.5" placeholder="Suka minta pewangi ekstra" />
+          <textarea name="notes" rows={3} className="w-full border rounded-lg p-2.5" placeholder="Cth: Suka minta pewangi ekstra" />
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}

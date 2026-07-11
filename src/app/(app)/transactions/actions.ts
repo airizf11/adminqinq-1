@@ -11,11 +11,22 @@ export async function createTransaction(formData: FormData) {
   const amount = Number(formData.get("amount"));
   const paymentMethod = formData.get("paymentMethod") as string;
   const description = (formData.get("description") as string) || undefined;
+  const fee = formData.get("fee") ? Number(formData.get("fee")) : undefined;
+  const transactionDate =
+    (formData.get("transactionDate") as string) || undefined;
 
   try {
     await cotebek("/transactions", {
       method: "POST",
-      body: { type, category, amount, paymentMethod, description },
+      body: {
+        type,
+        category,
+        amount,
+        paymentMethod,
+        description,
+        fee,
+        transactionDate: formData.get("transactionDate") || undefined,
+      },
     });
   } catch (e) {
     return {

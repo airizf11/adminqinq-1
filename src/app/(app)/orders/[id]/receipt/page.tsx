@@ -4,7 +4,7 @@ import { PrintButton } from './PrintButton';
 
 type ReceiptData = {
   business: { name: string; address: string | null; phone: string | null; footer: string };
-  order: { orderNumber: string; paymentMethod: string; createdAt: string };
+  order: { orderNumber: string; paymentMethod: string; createdAt: string; paymentStatus: 'PAID' | 'UNPAID' };
   customer: { name: string | null };
   items: { itemName: string; qty: number; price: number; subtotal: number }[];
   summary: { subtotal: number; discountAmount: number; promoName: string | null; total: number };
@@ -19,7 +19,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
     <div className="p-4">
       <PrintButton />
 
-      <div className="max-w-[320px] mx-auto font-mono text-xs bg-white p-4 border rounded-lg print:border-0 print:shadow-none print:max-w-none print:p-0">
+      <style>{`@page { size: 58mm auto; margin: 2mm; }`}</style>
+
+      <div className="max-w-[320px] print:max-w-[200px] mx-auto font-mono text-[11px] print:text-[10px] bg-white p-4 border rounded-lg print:border-0 print:shadow-none print:p-0">
         <div className="text-center mb-3">
           <div className="font-bold text-sm">{r.business.name}</div>
           {r.business.address && <div>{r.business.address}</div>}
@@ -56,6 +58,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <span>Total</span><span>Rp{r.summary.total.toLocaleString('id-ID')}</span>
           </div>
           <div className="flex justify-between"><span>Bayar</span><span>{r.order.paymentMethod}</span></div>
+
+          <div className="flex justify-between font-bold">
+           <span>Status</span>
+           <span>{r.order.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM LUNAS'}</span>
+         </div>
         </div>
 
         <div className="border-t border-dashed border-black pt-2 text-center">{r.business.footer}</div>

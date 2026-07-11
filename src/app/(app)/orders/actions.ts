@@ -20,6 +20,8 @@ export async function createOrder(payload: {
   dueDate?: string;
   customerId?: string;
   promoCode?: string;
+  note?: string;
+  paymentStatus?: "PAID" | "UNPAID";
 }) {
   const totalAmount = payload.items.reduce((sum, i) => sum + i.subtotal, 0);
   const totalCogs = payload.items.reduce((sum, i) => sum + i.cogs * i.qty, 0);
@@ -35,6 +37,8 @@ export async function createOrder(payload: {
         dueDate: payload.dueDate || undefined,
         customerId: payload.customerId,
         promoCode: payload.promoCode,
+        metadata: payload.note ? { note: payload.note } : undefined,
+        paymentStatus: payload.paymentStatus,
       },
     });
   } catch (e) {

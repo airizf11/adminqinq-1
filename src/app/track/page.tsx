@@ -1,5 +1,10 @@
 // adminqinq/src/app/track/page.tsx
 import { redirect } from 'next/navigation';
+import Image from 'next/image';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Search, WashingMachine, HelpCircle } from 'lucide-react';
 
 export default async function TrackSearchPage({
   searchParams,
@@ -12,21 +17,68 @@ export default async function TrackSearchPage({
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6">
-      <h1 className="text-xl font-semibold mb-1">Cek Status Cucian</h1>
-      <p className="text-sm text-gray-500 mb-8">Masukkan nomor order dari struk kamu</p>
+    <div className="min-h-screen bg-muted/20 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        
+        {/* BRANDING HEADER */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center p-2 bg-primary/5 rounded-full shadow-inner mb-2 border border-primary/10 overflow-hidden w-20 h-20">
+            <Image 
+              src="/logo.png" 
+              alt="Logo Qinq Laundry" 
+              width={800} 
+              height={800}
+              className="object-contain"
+              priority
+            />
+          </div>
+          
+          {/* Teks nama brand di bawahnya (bisa dihapus kalau di logomu sudah ada teksnya) */}
+          <h1 className="text-3xl font-heading font-bold text-primary tracking-tight">
+            Qinq <span className="text-secondary">Laundry</span>
+          </h1>
+          <p className="text-muted-foreground text-sm font-medium">
+            Pantau status pakaian kesayanganmu kapan saja.
+          </p>
+        </div>
 
-      <form method="GET" className="w-full max-w-sm space-y-3">
-        <input
-          name="order"
-          required
-          placeholder="ORD-20260708-0001"
-          className="w-full border rounded-lg p-3 text-center uppercase"
-        />
-        <button type="submit" className="w-full bg-black text-white rounded-lg p-3 font-medium">
-          Cek Status
-        </button>
-      </form>
+        {/* SEARCH CARD */}
+        <Card className="shadow-xl shadow-primary/5 border-border">
+          <CardHeader className="text-center pb-5">
+            <CardTitle className="text-lg font-bold text-foreground">Lacak Pesanan</CardTitle>
+            <CardDescription>
+              Masukkan Nomor Order yang tertera pada struk atau pesan WhatsApp dari kami.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form method="GET" className="space-y-5">
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={22} />
+                <Input
+                  name="order"
+                  required
+                  placeholder="Contoh: ORD-2026..."
+                  className="pl-12 h-14 text-center text-lg font-bold tracking-wider uppercase bg-background shadow-sm border-input hover:border-primary/50 focus-visible:ring-primary transition-all"
+                  aria-label="Nomor Order"
+                />
+              </div>
+              <Button type="submit" size="lg" className="w-full h-14 text-base font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                Cek Status Sekarang
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* FOOTER HELP */}
+        <div className="text-center flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+          <HelpCircle size={14} />
+          <span>Lupa nomor order?</span>
+          <a href="https://wa.me/6287767681168" className="text-primary font-semibold hover:underline underline-offset-2">
+            Hubungi Admin
+          </a>
+        </div>
+
+      </div>
     </div>
   );
 }

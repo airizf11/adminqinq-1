@@ -1,7 +1,18 @@
 // adminqinq/src/app/(app)/customers/page.tsx
 import Link from 'next/link';
-import { MessageCircle, ChevronRight } from 'lucide-react';
 import { cotebek } from '@/lib/cotebek';
+import { Card, CardContent } from '@/components/ui/card';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { 
+  MessageCircle, 
+  ChevronRight, 
+  UserPlus, 
+  Users, 
+  MapPin, 
+  Phone, 
+  User 
+} from 'lucide-react';
 
 type Customer = { id: string; name: string; phone: string; city: string | null };
 
@@ -16,33 +27,110 @@ export default async function CustomersPage() {
   const customers = res.data;
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-lg font-semibold">Pelanggan</h1>
-        <Link href="/customers/new" className="text-sm bg-black text-white px-3 py-1.5 rounded-lg">
-          + Tambah
+    <div className="p-4 pb-24 space-y-6">
+      
+      {/* 1. HEADER & TOMBOL TAMBAH */}
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-2xl font-heading font-bold text-primary tracking-tight">Pelanggan</h1>
+          <p className="text-sm text-muted-foreground mt-1">Daftar kontak pelanggan laundry.</p>
+        </div>
+        <Link 
+          href="/customers/new" 
+          className={cn(
+            buttonVariants({ size: "sm" }), 
+            "rounded-full shadow-md shrink-0 flex items-center gap-1 whitespace-nowrap"
+          )}
+        >
+          <UserPlus size={16} aria-hidden="true" /> Tambah
         </Link>
       </div>
 
-      {customers.length === 0 && <p className="text-sm text-gray-500">Belum ada pelanggan.</p>}
+      {/* 2. EMPTY STATE */}
+      {customers.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/30 rounded-2xl border border-dashed border-border mt-4">
+          <div className="w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4 shadow-sm">
+            <Users className="text-muted-foreground opacity-50" size={32} aria-hidden="true" />
+          </div>
+          <p className="text-foreground font-medium">Belum ada data pelanggan</p>
+          <p className="text-sm text-muted-foreground mt-1 max-w-[250px]">
+            Data pelanggan akan otomatis tersimpan saat Anda membuat order baru.
+          </p>
+        </div>
+      )}
 
-      <ul className="space-y-2">
+      {/* 3. LIST PELANGGAN */}
+      <ul className="grid gap-3" aria-label="Daftar Pelanggan">
         {customers.map((c) => (
-          <li key={c.id} className="border rounded-lg flex items-center">
-            <Link href={`/customers/${c.id}`} className="flex-1 p-3 flex items-center justify-between active:bg-gray-50">
-              <div>
-                <div className="font-medium">{c.name}</div>
-                <div className="text-xs text-gray-500">{c.phone ?? 'Tanpa No. HP'}{c.city ? ` · ${c.city}` : ''}</div>
-              </div>
-              <ChevronRight size={18} className="text-gray-400" />
-            </Link>
-            {c.phone && (
-            <a href={waLink(c.phone)} target="_blank" rel="noopener noreferrer" className="p-3 text-green-600" aria-label="Chat WhatsApp">
-              <MessageCircle size={20} />
-            </a>)}
+          <li key={c.id}>
+            <Card className="relative group overflow-hidden border-border hover:border-primary/40 shadow-sm hover:shadow-md transition-all duration-200">
+              
+              {/* LINK DETAIL PELANGGAN (Hitbox merentang ke seluruh Card) */}
+              <Link 
+                href={`/customers/${c.id}`} 
+                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl before:absolute before:inset-0 z-0"
+                aria-label={`Lihat detail pelanggan ${c.name}`}
+              >
+                <span className="sr-only">Lihat detail pelanggan {c.name}</span>
+              </Link>
+
+              <CardContent className="p-3 flex items-center gap-3">
+                
+                {/* AVATAR PLACEHOLDER */}
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0" aria-hidden="true">
+                  <User size={20} />
+                </div>
+
+                {/* INFO TEXT */}
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-foreground text-sm truncate">
+                    {c.name}
+                  </div>
+                  
+                  <div className="flex flex-col mt-0.5 space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
+                      <Phone size={12} className="shrink-0" aria-hidden="true" />
+                      <span className="sr-only">Nomor telepon: </span>
+                      {c.phone ?? <span className="italic opacity-70">Tanpa No. HP</span>}
+                    </div>
+                    {c.city && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
+                        <MapPin size={12} className="shrink-0" aria-hidden="true" />
+                        <span className="sr-only">Kota: </span>
+                        {c.city}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ACTION BUTTONS (Z-10 agar bisa diklik mandiri) */}
+                <div className="flex items-center gap-1 shrink-0 relative z-10">
+                  {c.phone && (
+                    <a 
+                      href={waLink(c.phone)} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon" }),
+                        "w-9 h-9 rounded-full text-green-600 hover:text-green-700 hover:bg-green-50 active:scale-95"
+                      )}
+                      aria-label={`Chat WhatsApp dengan ${c.name}`}
+                      title="Chat WhatsApp"
+                    >
+                      <MessageCircle size={18} />
+                    </a>
+                  )}
+                  <div className="w-8 h-8 flex items-center justify-center text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all pointer-events-none" aria-hidden="true">
+                    <ChevronRight size={18} />
+                  </div>
+                </div>
+
+              </CardContent>
+            </Card>
           </li>
         ))}
       </ul>
+
     </div>
   );
 }

@@ -2,6 +2,11 @@
 'use client';
 
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { CalendarRange, ArrowRightLeft, X, Filter } from 'lucide-react';
 
 export function FilterForm({
   startDate,
@@ -17,40 +22,100 @@ export function FilterForm({
   const [showCompare, setShowCompare] = useState(!!compareStartDate);
 
   return (
-    <form method="GET" className="border rounded-lg p-3 mb-4 space-y-3">
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="text-xs text-gray-500 block mb-1">Dari</label>
-          <input type="date" name="startDate" defaultValue={startDate} className="w-full border rounded-lg p-2 text-sm" />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500 block mb-1">Sampai</label>
-          <input type="date" name="endDate" defaultValue={endDate} className="w-full border rounded-lg p-2 text-sm" />
-        </div>
-      </div>
-
-      {showCompare ? (
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <label className="text-xs text-gray-500">Bandingkan dengan</label>
-            <button type="button" onClick={() => setShowCompare(false)} className="text-xs text-red-500">
-              Hapus perbandingan
-            </button>
+    <form method="GET" className="mb-6">
+      <Card className="border-border shadow-sm overflow-hidden bg-muted/10">
+        <CardContent className="p-4 space-y-4">
+          
+          {/* --- PERIODE UTAMA --- */}
+          <div>
+            <Label className="text-sm font-bold flex items-center gap-1.5 mb-2.5 text-foreground">
+              <CalendarRange size={16} className="text-primary" aria-hidden="true" /> 
+              Periode Utama
+            </Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dari Tanggal</Label>
+                <Input 
+                  type="date" 
+                  name="startDate" 
+                  defaultValue={startDate} 
+                  required
+                  className="h-10 bg-background shadow-sm" 
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sampai Tanggal</Label>
+                <Input 
+                  type="date" 
+                  name="endDate" 
+                  defaultValue={endDate} 
+                  required
+                  className="h-10 bg-background shadow-sm" 
+                />
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <input type="date" name="compareStartDate" defaultValue={compareStartDate} className="w-full border rounded-lg p-2 text-sm" />
-            <input type="date" name="compareEndDate" defaultValue={compareEndDate} className="w-full border rounded-lg p-2 text-sm" />
-          </div>
-        </div>
-      ) : (
-        <button type="button" onClick={() => setShowCompare(true)} className="text-xs text-blue-600">
-          + Bandingkan periode lain
-        </button>
-      )}
 
-      <button type="submit" className="w-full bg-black text-white rounded-lg p-2.5 text-sm font-medium">
-        Terapkan
-      </button>
+          {/* --- PERIODE PEMBANDING (COMPARE) --- */}
+          {showCompare ? (
+            <div className="pt-3 border-t border-dashed border-border animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex justify-between items-center mb-2.5">
+                <Label className="text-sm font-bold flex items-center gap-1.5 text-foreground">
+                  <ArrowRightLeft size={16} className="text-orange-500" aria-hidden="true" /> 
+                  Bandingkan Dengan
+                </Label>
+                <button 
+                  type="button" 
+                  onClick={() => setShowCompare(false)} 
+                  className="text-xs text-destructive hover:text-destructive/80 font-semibold flex items-center gap-1 transition-colors px-2 py-1 rounded-md hover:bg-destructive/10 cursor-pointer"
+                >
+                  <X size={14} aria-hidden="true" /> Hapus
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dari Tanggal</Label>
+                  <Input 
+                    type="date" 
+                    name="compareStartDate" 
+                    defaultValue={compareStartDate} 
+                    required={showCompare} 
+                    className="h-10 bg-background border-orange-200 focus-visible:ring-orange-500 shadow-sm" 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sampai Tanggal</Label>
+                  <Input 
+                    type="date" 
+                    name="compareEndDate" 
+                    defaultValue={compareEndDate} 
+                    required={showCompare} 
+                    className="h-10 bg-background border-orange-200 focus-visible:ring-orange-500 shadow-sm" 
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="pt-1">
+              <button 
+                type="button" 
+                onClick={() => setShowCompare(true)} 
+                className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <ArrowRightLeft size={14} aria-hidden="true" /> Tambah Periode Pembanding
+              </button>
+            </div>
+          )}
+
+          {/* --- TOMBOL SUBMIT --- */}
+          <div className="pt-2">
+            <Button type="submit" className="w-full h-11 font-bold shadow-md cursor-pointer">
+              <Filter size={18} className="mr-2" aria-hidden="true" /> Terapkan Filter
+            </Button>
+          </div>
+
+        </CardContent>
+      </Card>
     </form>
   );
 }

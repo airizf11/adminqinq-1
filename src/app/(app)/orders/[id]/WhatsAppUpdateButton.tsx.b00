@@ -32,6 +32,7 @@ export function WhatsAppUpdateButton({
   createdAt,
   currentStatus,
   statusHistory,
+  paymentStatus,
 }: {
   customerName: string | null;
   customerPhone: string | null;
@@ -39,6 +40,7 @@ export function WhatsAppUpdateButton({
   createdAt: string;
   currentStatus: string;
   statusHistory: StatusHistoryItem[];
+  paymentStatus: 'PAID' | 'UNPAID';
 }) {
   if (!customerPhone) return null;
 
@@ -63,6 +65,8 @@ export function WhatsAppUpdateButton({
     timelineText,
     '',
     STATUS_MESSAGE[currentStatus] ?? '',
+    '',
+    paymentStatus === 'UNPAID' ? '\n💰 *Belum lunas* — jangan lupa bawa uangnya ya!' : '',
     '',
     `Cek status kapan aja di:`,
    `${process.env.NEXT_PUBLIC_APP_URL}/track/${orderNumber}`,

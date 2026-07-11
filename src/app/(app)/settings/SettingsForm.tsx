@@ -3,15 +3,43 @@
 
 import { useState } from 'react';
 import { saveSettings } from './actions';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { 
+  Store, 
+  MapPin, 
+  Phone, 
+  MessageSquare, 
+  Hash, 
+  ReceiptText, 
+  Save, 
+  Loader2, 
+  CheckCircle2, 
+  AlertCircle 
+} from 'lucide-react';
 
-export function SettingsForm({ settings }: { settings: { order_prefix?: string; tx_prefix?: string;
-   business_name?: string;
-   business_address?: string;
-   business_phone?: string;
-   receipt_footer?: string; } }) {
+type Settings = { 
+  order_prefix?: string; 
+  tx_prefix?: string;
+  business_name?: string;
+  business_address?: string;
+  business_phone?: string;
+  receipt_footer?: string; 
+};
+
+export function SettingsForm({ settings }: { settings: Settings }) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [pending, setPending] = useState(false);
+
+  // State untuk Real-time Preview Penomoran
+  const [orderPrefix, setOrderPrefix] = useState(settings.order_prefix ?? 'ORD');
+  const [txPrefix, setTxPrefix] = useState(settings.tx_prefix ?? 'TRX');
+
+  // Menghasilkan string tanggal hari ini untuk preview (Contoh: 20260711)
+  const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -19,67 +47,161 @@ export function SettingsForm({ settings }: { settings: { order_prefix?: string; 
     setSaved(false);
     const result = await saveSettings(formData);
     setPending(false);
-    if (result?.error) setError(result.error);
-    else setSaved(true);
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      setSaved(true);
+      // Sembunyikan pesan sukses setelah 3 detik
+      setTimeout(() => setSaved(false), 3000);
+    }
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4">
-      <h2 className="text-sm font-medium text-gray-600">Info Struk</h2>
+    <form action={handleSubmit} className="space-y-6">
+      
+      {/* 1. KARTU PROFIL TOKO & STRUK */}
+      <Card className="shadow-sm border-border">
+        <CardHeader className="pb-4 border-b border-border/50">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Store size={18} className="text-primary" /> Profil Toko & Struk
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Informasi ini akan tercetak pada nota pelanggan Anda.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-4 space-y-4">
+          
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              Nama Usaha
+            </Label>
+            <Input 
+              name="business_name" 
+              defaultValue={settings.business_name ?? ''} 
+              className="h-11 bg-background font-medium" 
+              placeholder="Contoh: Qinq Laundry Bersih" 
+            />
+          </div>
 
-      <div>
-       <label className="text-sm text-gray-600 block mb-1">Nama Usaha</label>
-       <input name="business_name" defaultValue={settings.business_name ?? ''} className="w-full border rounded-lg p-2.5" placeholder="Laundry Bersih Jaya" />
-     </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              <Phone size={14} className="text-muted-foreground" /> No. Telepon / WhatsApp
+            </Label>
+            <Input 
+              name="business_phone" 
+              defaultValue={settings.business_phone ?? ''} 
+              className="h-11 bg-background" 
+              placeholder="Contoh: 081234567890" 
+            />
+          </div>
 
-     <div>
-       <label className="text-sm text-gray-600 block mb-1">Alamat</label>
-       <input name="business_address" defaultValue={settings.business_address ?? ''} className="w-full border rounded-lg p-2.5" />
-     </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              <MapPin size={14} className="text-muted-foreground" /> Alamat Lengkap
+            </Label>
+            {/* Menggunakan textarea standar Tailwind agar alamat panjang bisa muat */}
+            <textarea 
+              name="business_address" 
+              defaultValue={settings.business_address ?? ''} 
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px] resize-none"
+              placeholder="Contoh: Jl. Sudirman No. 123, Surabaya"
+            />
+          </div>
 
-     <div>
-       <label className="text-sm text-gray-600 block mb-1">No. Telepon</label>
-       <input name="business_phone" defaultValue={settings.business_phone ?? ''} className="w-full border rounded-lg p-2.5" />
-     </div>
+          <div className="space-y-2 pt-2 border-t border-dashed border-border">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              <MessageSquare size={14} className="text-muted-foreground" /> Pesan Penutup (Footer Struk)
+            </Label>
+            <Input 
+              name="receipt_footer" 
+              defaultValue={settings.receipt_footer ?? ''} 
+              className="h-11 bg-background" 
+              placeholder="Contoh: Terima kasih telah mencuci di tempat kami!" 
+            />
+          </div>
 
-     <div>
-       <label className="text-sm text-gray-600 block mb-1">Footer Struk</label>
-       <input name="receipt_footer" defaultValue={settings.receipt_footer ?? ''} className="w-full border rounded-lg p-2.5" placeholder="Terima kasih!" />
-     </div>
+        </CardContent>
+      </Card>
 
-     <hr className="border-gray-200" />
-     <h2 className="text-sm font-medium text-gray-600">Format Nomor</h2>
+      {/* 2. KARTU FORMAT PENOMORAN */}
+      <Card className="shadow-sm border-border">
+        <CardHeader className="pb-4 border-b border-border/50">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Hash size={18} className="text-primary" /> Format Penomoran Sistem
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Atur kode awalan untuk nota pesanan dan bukti transaksi kas.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-4 space-y-5">
+          
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              <ReceiptText size={14} className="text-muted-foreground" /> Prefix Nomor Order
+            </Label>
+            <Input
+              name="order_prefix"
+              value={orderPrefix}
+              onChange={(e) => setOrderPrefix(e.target.value.toUpperCase())}
+              maxLength={10}
+              className="h-11 bg-background uppercase font-bold tracking-widest"
+              placeholder="ORD"
+            />
+            <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md font-mono mt-1">
+              Pratinjau: <span className="font-bold text-foreground">{orderPrefix || 'ORD'}-{todayStr}-0001</span>
+            </div>
+          </div>
 
-      <div>
-        <label className="text-sm text-gray-600 block mb-1">Prefix Nomor Order</label>
-        <input
-          name="order_prefix"
-          defaultValue={settings.order_prefix ?? 'ORD'}
-          maxLength={10}
-          className="w-full border rounded-lg p-2.5 uppercase"
-          placeholder="ORD"
-        />
-        <p className="text-xs text-gray-400 mt-1">Contoh hasil: {settings.order_prefix ?? 'ORD'}-20260706-0001</p>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              <ReceiptText size={14} className="text-muted-foreground" /> Prefix Transaksi Kas
+            </Label>
+            <Input
+              name="tx_prefix"
+              value={txPrefix}
+              onChange={(e) => setTxPrefix(e.target.value.toUpperCase())}
+              maxLength={10}
+              className="h-11 bg-background uppercase font-bold tracking-widest"
+              placeholder="TRX"
+            />
+            <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md font-mono mt-1">
+              Pratinjau: <span className="font-bold text-foreground">{txPrefix || 'TRX'}-{todayStr}-0001</span>
+            </div>
+          </div>
+
+        </CardContent>
+      </Card>
+
+      {/* 3. NOTIFIKASI & TOMBOL SUBMIT */}
+      <div className="space-y-3">
+        {error && (
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm font-medium animate-in slide-in-from-bottom-2">
+            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+            <p>{error}</p>
+          </div>
+        )}
+        
+        {saved && !error && (
+          <div className="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm font-medium animate-in fade-in slide-in-from-bottom-2">
+            <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+            <p>Pengaturan berhasil disimpan!</p>
+          </div>
+        )}
+
+        <Button 
+          type="submit" 
+          disabled={pending} 
+          className="w-full h-12 text-base font-bold shadow-md cursor-pointer"
+        >
+          {pending ? (
+            <Loader2 size={18} className="animate-spin mr-2" />
+          ) : (
+            <Save size={18} className="mr-2" />
+          )}
+          {pending ? 'Menyimpan Perubahan...' : 'Simpan Pengaturan'}
+        </Button>
       </div>
 
-      <div>
-        <label className="text-sm text-gray-600 block mb-1">Prefix Nomor Transaksi</label>
-        <input
-          name="tx_prefix"
-          defaultValue={settings.tx_prefix ?? 'TRX'}
-          maxLength={10}
-          className="w-full border rounded-lg p-2.5 uppercase"
-          placeholder="TRX"
-        />
-        <p className="text-xs text-gray-400 mt-1">Contoh hasil: {settings.tx_prefix ?? 'TRX'}-20260706-0001</p>
-      </div>
-
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      {saved && !error && <p className="text-sm text-green-600">Tersimpan.</p>}
-
-      <button type="submit" disabled={pending} className="w-full bg-black text-white rounded-lg p-3 font-medium disabled:opacity-50">
-        {pending ? 'Menyimpan...' : 'Simpan'}
-      </button>
     </form>
   );
 }
