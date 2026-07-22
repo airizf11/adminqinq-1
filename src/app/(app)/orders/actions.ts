@@ -22,6 +22,7 @@ export async function createOrder(payload: {
   promoCode?: string;
   note?: string;
   paymentStatus?: "PAID" | "UNPAID";
+  teamMemberId?: string;
 }) {
   const totalAmount = payload.items.reduce((sum, i) => sum + i.subtotal, 0);
   const totalCogs = payload.items.reduce((sum, i) => sum + i.cogs * i.qty, 0);

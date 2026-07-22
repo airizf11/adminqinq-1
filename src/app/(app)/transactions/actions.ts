@@ -12,8 +12,18 @@ export async function createTransaction(formData: FormData) {
   const paymentMethod = formData.get("paymentMethod") as string;
   const description = (formData.get("description") as string) || undefined;
   const fee = formData.get("fee") ? Number(formData.get("fee")) : undefined;
+
+  // Input datetime-local gak bawa info zona waktu — kita anggap selalu WIB (UTC+7)
+  // biar gak gantung ke timezone environment server yang ngejalanin kode ini.
+  function toWIBISOString(localValue: string): string {
+    return `${localValue}:00+07:00`;
+  }
+
   const transactionDate =
     (formData.get("transactionDate") as string) || undefined;
+  const paymentStatus = (formData.get("paymentStatus") as string) || undefined;
+  const dueDate = (formData.get("dueDate") as string) || undefined;
+  const teamMemberId = (formData.get("teamMemberId") as string) || undefined;
 
   try {
     await cotebek("/transactions", {
@@ -25,7 +35,12 @@ export async function createTransaction(formData: FormData) {
         paymentMethod,
         description,
         fee,
-        transactionDate: formData.get("transactionDate") || undefined,
+        transactionDate: transactionDate
+          ? toWIBISOString(transactionDate)
+          : undefined,
+        paymentStatus,
+        dueDate,
+        teamMemberId,
       },
     });
   } catch (e) {
@@ -36,4 +51,14 @@ export async function createTransaction(formData: FormData) {
 
   revalidatePath("/transactions");
   redirect("/transactions");
+}
+
+export async function markTransactionPaid(id: string) {
+  try {
+    await cotebek(`/transactions/${id}/pay`, { method: "PATCH" });
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Gagal menandai lunas." };
+  }
+  revalidatePath("/transactions");
+  return { success: true };
 }

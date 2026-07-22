@@ -8,11 +8,14 @@ import { ArrowLeft, PackageX, Plus } from 'lucide-react';
 
 type Item = { id: string; name: string; price: number; cogs: number };
 type Promo = { id: string; name: string; code: string | null; isActive: boolean; type: 'PERCENTAGE' | 'NOMINAL'; value: number };
+type TeamMember = { id: string; name: string }; // Tambahan tipe pekerja
 
 export default async function NewOrderPage() {
-  const [itemsRes, promosRes] = await Promise.all([
+  // Tambahkan teamRes ke dalam Promise.all agar fetch-nya paralel (cepat)
+  const [itemsRes, promosRes, teamRes] = await Promise.all([
     cotebek<{ data: Item[] }>('/items'),
     cotebek<{ data: Promo[] }>('/promos'),
+    cotebek<{ data: TeamMember[] }>('/team-members'),
   ]);
 
   // Promo tanpa kode gak bisa dipakai lewat mekanisme checkout sekarang, jadi disaring
@@ -60,7 +63,13 @@ export default async function NewOrderPage() {
         </div>
       ) : (
         <div className="mt-2">
-          <OrderForm items={itemsRes.data} promos={activePromos} />
+          {/* Form sekarang menerima tambahan props teamMembers */}
+          <OrderForm 
+              items={itemsRes.data}
+              promos={activePromos}
+              teamMembers={teamRes.data}
+              // teamMembers={[]}
+          />
         </div>
       )}
       

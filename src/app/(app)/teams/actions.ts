@@ -32,3 +32,15 @@ export async function removeMember(appId: string, userId: string) {
   revalidatePath("/members");
   return { success: true };
 }
+
+export async function addTeamMember(name: string, phone?: string) {
+  try {
+    await cotebek("/team-members", { method: "POST", body: { name, phone } });
+  } catch (e) {
+    return {
+      error: e instanceof Error ? e.message : "Gagal menambah anggota.",
+    };
+  }
+  revalidatePath("/teams");
+  return { success: true };
+}

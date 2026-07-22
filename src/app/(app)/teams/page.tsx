@@ -2,10 +2,12 @@
 import { cotebek } from '@/lib/cotebek';
 import { InviteForm } from './InviteForm';
 import { RemoveButton } from './RemoveButton';
+import { AddTeamMemberForm } from './AddTeamMember';
 
 type MyApp = { appId: string; appName: string; role: string };
 type Member = { userId: string; name: string | null; email: string; role: string; status: string };
 type Invite = { id: string; email: string; role: string };
+type TeamMember = { id: string; name: string; phone: string | null; userId: string | null };
 
 const ROLE_LABEL: Record<string, string> = { OWNER: 'Owner', ADMIN: 'Admin', STAFF: 'Staf' };
 
@@ -13,11 +15,12 @@ export default async function MembersPage() {
   const currentAppRes = await cotebek<{ data: { id: string; name: string } }>('/apps/me');
  const appId = currentAppRes.data.id;
 
- let membersRes, invitesRes;
+ let membersRes, invitesRes, teamMembersRes;
  try {
-   [membersRes, invitesRes] = await Promise.all([
+   [membersRes, invitesRes, teamMembersRes] = await Promise.all([
      cotebek<{ data: Member[] }>(`/apps/${appId}/members`),
      cotebek<{ data: Invite[] }>(`/apps/${appId}/invites`),
+     cotebek<{ data: TeamMember[] }>('/team-members'),
    ]);
  } catch {
    return (
@@ -30,12 +33,14 @@ export default async function MembersPage() {
 
   const members = membersRes.data;
   const invites = invitesRes.data;
+  const unlinkedMembers = teamMembersRes.data.filter((m) => m.userId === null);
 
   return (
     <div className="p-4 pb-8">
       <h1 className="text-lg font-semibold mb-4">Anggota Tim</h1>
 
       <InviteForm appId={appId} />
+      <AddTeamMemberForm />
 
       {invites.length > 0 && (
         <div className="mb-4">
@@ -72,6 +77,20 @@ export default async function MembersPage() {
           </ul>
         )}
       </div>
+
+      {unlinkedMembers.length > 0 && (
+       <div className="mt-4">
+         <h2 className="text-sm font-medium text-gray-600 mb-2">Anggota Tanpa Akun</h2>
+         <ul className="space-y-2">
+           {unlinkedMembers.map((m) => (
+             <li key={m.id} className="border rounded-lg p-3 text-sm">
+               <div className="font-medium">{m.name}</div>
+               {m.phone && <div className="text-xs text-gray-500">{m.phone}</div>}
+             </li>
+           ))}
+         </ul>
+       </div>
+     )}
     </div>
   );
 }

@@ -18,7 +18,9 @@ import {
   Loader2, 
   Save,
   CalendarClock,
-  Receipt
+  Receipt,
+  CheckCircle2,
+  CalendarDays
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -182,6 +184,37 @@ export default function NewTransactionPage() {
                 </p>
               </div>
             </div>
+
+            {/* 6. STATUS BAYAR & JATUH TEMPO */}
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="space-y-2">
+               <Label className="text-sm font-semibold flex items-center gap-1.5">
+                 <CheckCircle2 size={14} /> Status Bayar
+               </Label>
+               <select 
+                 name="paymentStatus" 
+                 defaultValue="PAID"
+                 className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+               >
+                 <option value="PAID">Sudah Lunas</option>
+                 <option value="UNPAID">Belum Lunas (Utang)</option>
+               </select>
+             </div>
+
+             <div className="space-y-2">
+               <Label className="text-sm font-semibold flex items-center gap-1.5">
+                 <CalendarDays size={14} /> Jatuh Tempo (Opsional)
+               </Label>
+               <Input 
+                 name="dueDate" 
+                 type="date" 
+                 className="h-11 bg-background" 
+               />
+               <p className="text-[11px] text-muted-foreground leading-tight">
+                 Batas waktu bayar (jika status belum lunas).
+               </p>
+             </div>
+           </div>
 
             {/* 6. KETERANGAN CATATAN (FULL WIDTH) */}
             <div className="space-y-2 border-t border-dashed border-border pt-4">

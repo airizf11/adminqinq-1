@@ -86,7 +86,7 @@ export default async function ReportsPage() {
 
       {/* 3. SUMMARY CARDS */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
+        <Card className="shadow-sm border-emerald-200 bg-emerald-50/10">
           <CardContent className="p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-emerald-600 mb-1">
               <TrendingUp size={14} />
@@ -96,7 +96,7 @@ export default async function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-blue-200 bg-blue-50/30">
+        <Card className="shadow-sm border-blue-200 bg-blue-50/10">
           <CardContent className="p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-blue-600 mb-1">
               <Wallet size={14} />
@@ -116,7 +116,7 @@ export default async function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-purple-200 bg-purple-50/30">
+        <Card className="shadow-sm border-purple-200 bg-purple-50/10">
           <CardContent className="p-4 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-purple-600 mb-1">
               <Receipt size={14} />

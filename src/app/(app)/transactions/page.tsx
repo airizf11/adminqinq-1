@@ -15,6 +15,7 @@ import {
   ArrowDownLeft, 
   ArrowUpRight 
 } from 'lucide-react';
+import { MarkPaidInline } from './MarkPaidInline';
 
 type Transaction = {
   id: string;
@@ -25,6 +26,7 @@ type Transaction = {
   fee: number | null;
   description: string | null;
   createdAt: string;
+  paymentStatus: 'PAID' | 'UNPAID';
 };
 
 type TransactionsResponse = {
@@ -201,9 +203,14 @@ export default async function TransactionsPage({
                       </div>
                     )}
                     
-                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 mt-1.5 text-muted-foreground shadow-none">
-                      {catLabel}
-                    </Badge>
+                    <div className="flex items-center justify-end gap-1.5 mt-1.5">
+                     {tx.paymentStatus === 'UNPAID' && (
+                       <MarkPaidInline id={tx.id} />
+                     )}
+                     <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-muted-foreground shadow-none shrink-0">
+                       {catLabel}
+                     </Badge>
+                   </div>
                   </div>
 
                 </CardContent>

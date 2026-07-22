@@ -28,6 +28,7 @@ type OrderDetail = {
   customerName: string | null;
   customerPhone: string | null;
   handledByName: string | null;
+  teamMemberName: string | null;
   promoCode: string | null;
   dueDate: string | null;
   metadata: { note?: string } | null;
@@ -125,6 +126,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   </span>
                 </div>
               )}
+
+              {/* Tambahan Info Pegawai/Kasir */}
+             {order.teamMemberName && (
+               <div className="flex justify-between pt-1.5 mt-1.5 border-t border-border/40">
+                 <span className="text-muted-foreground text-xs">Dilayani oleh</span>
+                 <span className="text-right text-xs font-semibold">{order.teamMemberName}</span>
+               </div>
+             )}
             </div>
           </div>
         </CardContent>

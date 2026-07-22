@@ -19,20 +19,23 @@ import {
   Loader2, 
   ShoppingCart, 
   ReceiptText, 
-  Banknote 
+  Banknote,
+  UserCheck
 } from 'lucide-react';
 
 type Item = { id: string; name: string; price: number; cogs: number };
 type CartLine = { itemId: string; itemName: string; qty: number; price: number; cogs: number };
 type PromoOption = { id: string; name: string; code: string; type: 'PERCENTAGE' | 'NOMINAL'; value: number };
+type TeamMember = { id: string; name: string }; // Tambahan tipe pekerja
 
 const PAYMENT_METHODS = ['Tunai', 'Transfer Bank', 'QRIS', 'E-Wallet'];
 
-export function OrderForm({ items, promos }: { items: Item[]; promos: PromoOption[] }) {
+export function OrderForm({ items, promos, teamMembers }: { items: Item[]; promos: PromoOption[]; teamMembers: TeamMember[] }) {
   const [cart, setCart] = useState<Record<string, CartLine>>({});
   const [customer, setCustomer] = useState<CustomerMatch | null>(null);
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0]);
   const [paymentStatus, setPaymentStatus] = useState<'PAID' | 'UNPAID'>('PAID');
+  const [teamMemberId, setTeamMemberId] = useState(''); // State kasir
   const [dueDate, setDueDate] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +115,8 @@ export function OrderForm({ items, promos }: { items: Item[]; promos: PromoOptio
     setPending(true);
 
     const selectedPromo = promos.find((p) => p.id === selectedPromoId);
+    
+    // Payload dengan penambahan teamMemberId
     const result = await createOrder({
       items: cartLines.map((l) => ({
         itemId: l.itemId,
@@ -127,6 +132,7 @@ export function OrderForm({ items, promos }: { items: Item[]; promos: PromoOptio
       promoCode: appliedPromo && selectedPromo ? selectedPromo.code : undefined,
       note: note.trim() || undefined,
       paymentStatus,
+      teamMemberId: teamMemberId || undefined, 
     });
 
     setPending(false);
@@ -232,9 +238,29 @@ export function OrderForm({ items, promos }: { items: Item[]; promos: PromoOptio
           {/* --- TANGGAL SELESAI --- */}
           <div className="space-y-1.5">
             <Label>Estimasi Selesai</Label>
-            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-10 text-sm" />
           </div>
         </div>
+
+        {/* --- DILAYANI OLEH (KASIR/PEKERJA) --- */}
+        {teamMembers.length > 0 && (
+          <div className="space-y-1.5">
+            <Label>Dilayani Oleh (Opsional)</Label>
+            <div className="relative">
+              <UserCheck size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <select 
+                value={teamMemberId} 
+                onChange={(e) => setTeamMemberId(e.target.value)} 
+                className="flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="">- Tanpa Keterangan -</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* --- STATUS BAYAR --- */}
         <div className="space-y-1.5">
