@@ -26,7 +26,7 @@ export async function createClientApp(
     if (clientEmail) {
       await cotebek(`/apps/${res.data.id}/invite`, {
         method: "POST",
-        body: { email: clientEmail, role: "ADMIN" },
+        body: { email: clientEmail, role: "OWNER" },
       });
       inviteMessage = `Invite terkirim ke ${clientEmail}. Klien tinggal login Google pakai email itu.`;
     }

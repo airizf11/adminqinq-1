@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/transactions/actions.ts
+// coteadmin/src/app/(app)/transactions/actions.ts
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -13,11 +13,9 @@ export async function createTransaction(formData: FormData) {
   const description = (formData.get("description") as string) || undefined;
   const fee = formData.get("fee") ? Number(formData.get("fee")) : undefined;
 
-  // Input datetime-local gak bawa info zona waktu — kita anggap selalu WIB (UTC+7)
-  // biar gak gantung ke timezone environment server yang ngejalanin kode ini.
-  function toWIBISOString(localValue: string): string {
+  /* function toWIBISOString(localValue: string): string {
     return `${localValue}:00+07:00`;
-  }
+  } */
 
   const transactionDate =
     (formData.get("transactionDate") as string) || undefined;
@@ -35,9 +33,7 @@ export async function createTransaction(formData: FormData) {
         paymentMethod,
         description,
         fee,
-        transactionDate: transactionDate
-          ? toWIBISOString(transactionDate)
-          : undefined,
+        transactionDate,
         paymentStatus,
         dueDate,
         teamMemberId,

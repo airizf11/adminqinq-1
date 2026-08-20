@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/transactions/page.tsx
+// coteadmin/src/app/(app)/transactions/page.tsx
 import { cotebek } from '@/lib/cotebek';
 import Link from 'next/link';
 import { FilterForm } from './FilterForm';
@@ -168,7 +168,7 @@ export default async function TransactionsPage({
                   className="absolute inset-0 z-0 rounded-xl"
                   aria-label={`Lihat detail transaksi ${tx.description || catLabel}`}
                 />
-                <CardContent className="relative z-10 pointer-events-none p-3.5 flex justify-between items-start gap-3">
+                <CardContent className="relative z-10 p-3.5 flex justify-between items-start gap-3">
                   
                   {/* Bagian Kiri: Ikon & Detail Teks */}
                   <div className="flex items-start gap-3 overflow-hidden mt-0.5">
