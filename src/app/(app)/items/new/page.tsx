@@ -3,6 +3,10 @@
 
 import { useState } from 'react';
 import { createItem } from '../actions';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ItemFormFields } from '../ItemFormFields';
+import { Loader2 } from 'lucide-react';
 
 export default function NewItemPage() {
   const [error, setError] = useState<string | null>(null);
@@ -17,39 +21,19 @@ export default function NewItemPage() {
 
   return (
     <div className="p-4">
-      <h1 className="text-lg font-semibold mb-4">Tambah Layanan</h1>
-
-      <form action={handleSubmit} className="space-y-4">
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Nama layanan</label>
-          <input name="name" required className="w-full border rounded-lg p-2.5" placeholder="Cuci Kilat 3kg" />
-        </div>
-
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Harga (Rp)</label>
-          <input name="price" type="number" min="0" required className="w-full border rounded-lg p-2.5" placeholder="15000" />
-        </div>
-
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Kategori (opsional)</label>
-          <input name="category" className="w-full border rounded-lg p-2.5" placeholder="Cuci Kering" />
-        </div>
-
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Modal / COGS (opsional)</label>
-          <input name="cogs" type="number" min="0" className="w-full border rounded-lg p-2.5" placeholder="5000" />
-        </div>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full bg-black text-white rounded-lg p-3 font-medium disabled:opacity-50"
-        >
-          {pending ? 'Menyimpan...' : 'Simpan'}
-        </button>
-      </form>
+      <h1 className="text-lg font-semibold text-foreground mb-4">Tambah Item</h1>
+      <Card className="shadow-sm">
+        <CardContent className="p-4">
+          <form action={handleSubmit} className="space-y-4">
+            <ItemFormFields />
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" disabled={pending} className="w-full h-11 font-medium">
+              {pending && <Loader2 size={16} className="mr-2 animate-spin" />}
+              {pending ? 'Menyimpan...' : 'Simpan'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

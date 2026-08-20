@@ -73,7 +73,7 @@ export default async function AuditLogsPage() {
                       variant="outline" 
                       className={cn(
                         "text-[10px] font-bold px-1.5 py-0.5 shrink-0 flex items-center gap-1 shadow-none border-0",
-                        isHuman ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"
+                        isHuman ? "bg-info/10 text-info" : "bg-muted text-muted-foreground"
                       )}
                     >
                       {isHuman ? <User size={12} /> : <Cpu size={12} />}
@@ -137,8 +137,8 @@ export default async function AuditLogsPage() {
                         
                         {log.after && (
                           <div className="space-y-1">
-                            <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Sesudah
+                            <div className="text-[10px] font-bold text-success uppercase tracking-wider flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> Sesudah
                             </div>
                             <pre className="text-[10px] bg-slate-950 text-slate-300 p-2.5 rounded-lg overflow-auto max-h-48 font-mono border border-slate-800 custom-scrollbar">
                               {JSON.stringify(log.after, null, 2)}

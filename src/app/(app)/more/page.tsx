@@ -11,15 +11,20 @@ import {
   Settings, 
   ClipboardList, 
   Users,
-  ChevronRight 
+  ChevronRight, 
+  Paperclip
 } from 'lucide-react';
 
 const MENU_GROUPS = [
   {
     title: 'Operasional',
     items: [
+      { href: '/orders', label: 'Pesanan / Order', icon: ClipboardList, ready: true },
       { href: '/items', label: 'Item & Layanan', icon: Package, ready: true },
+      { href: '/raw-materials', label: 'Bahan/Barang Beli', icon: Package, ready: true },
+      { href: '/customers', label: 'Pelanggan', icon: Users, ready: true },
       { href: '/promos', label: 'Promo & Diskon', icon: Tag, ready: true },
+      { href: '/attachments', label: 'Lampiran & Berkas', icon: Paperclip, ready: true },
     ]
   },
   {
@@ -47,7 +52,7 @@ export default function MorePage() {
       {/* HEADER */}
       <div className="mb-2">
         <h1 className="text-2xl font-heading font-bold text-primary tracking-tight">Menu Lainnya</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Kelola seluruh aspek operasional laundry-mu.</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Kelola seluruh aspek operasional usahamu.</p>
       </div>
 
       {/* MENU GROUPS */}

@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/settings/SettingsForm.tsx
+// coteadmin/src/app/(app)/settings/SettingsForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -17,8 +17,12 @@ import {
   Save, 
   Loader2, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle, 
+  Palette,
+  Clock
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 type Settings = { 
   order_prefix?: string; 
@@ -26,7 +30,11 @@ type Settings = {
   business_name?: string;
   business_address?: string;
   business_phone?: string;
-  receipt_footer?: string; 
+  receipt_footer?: string;
+  business_type?: string;
+  primary_color?: string;
+  website_url?: string;
+  dashboard_window_days?: string;
 };
 
 export function SettingsForm({ settings }: { settings: Settings }) {
@@ -37,6 +45,11 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   // State untuk Real-time Preview Penomoran
   const [orderPrefix, setOrderPrefix] = useState(settings.order_prefix ?? 'ORD');
   const [txPrefix, setTxPrefix] = useState(settings.tx_prefix ?? 'TRX');
+
+  const [businessType, setBusinessType] = useState(settings.business_type ?? 'JASA');
+  const [primaryColor, setPrimaryColor] = useState(settings.primary_color ?? '#f0a500');
+  const [websiteUrl, setWebsiteUrl] = useState(settings.website_url ?? '');
+  const [dashboardWindowDays, setDashboardWindowDays] = useState(settings.dashboard_window_days ?? '7');
 
   // Menghasilkan string tanggal hari ini untuk preview (Contoh: 20260711)
   const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -79,7 +92,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
               name="business_name" 
               defaultValue={settings.business_name ?? ''} 
               className="h-11 bg-background font-medium" 
-              placeholder="Contoh: Qinq Laundry Bersih" 
+              placeholder="cth: Toko Berkah Jaya" 
             />
           </div>
 
@@ -91,7 +104,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
               name="business_phone" 
               defaultValue={settings.business_phone ?? ''} 
               className="h-11 bg-background" 
-              placeholder="Contoh: 081234567890" 
+              placeholder="cth: 081234567890" 
             />
           </div>
 
@@ -104,24 +117,109 @@ export function SettingsForm({ settings }: { settings: Settings }) {
               name="business_address" 
               defaultValue={settings.business_address ?? ''} 
               className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px] resize-none"
-              placeholder="Contoh: Jl. Sudirman No. 123, Surabaya"
+              placeholder="cth: Jl. Sudirman No. 123, Surabaya"
             />
           </div>
+
+          <div className="space-y-2">
+        <Label htmlFor="website_url" className="text-sm font-semibold">Website (Opsional)</Label>
+        <Input
+          id="website_url"
+          name="website_url"
+          type="url"
+          value={websiteUrl}
+          onChange={(e) => setWebsiteUrl(e.target.value)}
+          placeholder="https://usahamu.com"
+        />
+        <p className="text-xs text-muted-foreground">Kalau diisi, muncul tombol "Kunjungi Halaman Utama" di halaman awal.</p>
+      </div>
 
           <div className="space-y-2 pt-2 border-t border-dashed border-border">
             <Label className="text-sm font-semibold flex items-center gap-1.5">
               <MessageSquare size={14} className="text-muted-foreground" /> Pesan Penutup (Footer Struk)
             </Label>
-            <Input 
+            <Textarea
               name="receipt_footer" 
               defaultValue={settings.receipt_footer ?? ''} 
               className="h-11 bg-background" 
-              placeholder="Contoh: Terima kasih telah mencuci di tempat kami!" 
+              placeholder="cth: Terima kasih telah mencuci di tempat kami!" 
             />
           </div>
 
         </CardContent>
       </Card>
+
+      {/* Branding Card */}
+      <Card className="shadow-sm border-border">
+  <CardHeader className="pb-4 border-b border-border/50">
+    <CardTitle className="text-base font-bold flex items-center gap-2">
+      <Palette size={18} className="text-primary" /> Tampilan Aplikasi
+    </CardTitle>
+    <CardDescription className="text-xs">
+      Menentukan menu navigasi & warna utama aplikasi.
+    </CardDescription>
+  </CardHeader>
+  <CardContent className="p-4 space-y-4">
+    <div className="space-y-2">
+      <Label className="text-sm font-semibold">Jenis Usaha</Label>
+      <input type="hidden" name="business_type" value={businessType} />
+      <Select value={businessType} onValueChange={(v) => setBusinessType(v ?? 'JASA')}>
+        <SelectTrigger className="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="JASA">Jasa (laundry, cukur, dll)</SelectItem>
+          <SelectItem value="FNB">Makanan & Minuman</SelectItem>
+          <SelectItem value="RETAIL">Retail / Toko</SelectItem>
+          <SelectItem value="PERSONAL">Pribadi (arisan, kas bersama)</SelectItem>
+        </SelectContent>
+      </Select>
+      <p className="text-xs text-muted-foreground">Menentukan menu apa yang muncul di navigasi bawah.</p>
+    </div>
+
+    <div className="space-y-2">
+      <Label className="text-sm font-semibold">Warna Utama</Label>
+      <div className="flex items-center gap-3">
+        <input
+          type="color"
+          name="primary_color"
+          value={primaryColor}
+          onChange={(e) => setPrimaryColor(e.target.value)}
+          className="h-10 w-14 rounded-md border border-border cursor-pointer bg-transparent"
+        />
+        <span className="text-sm text-muted-foreground font-mono">{primaryColor}</span>
+      </div>
+    </div>
+    
+  </CardContent>
+</Card>
+
+<Card className="shadow-sm border-border">
+       <CardHeader className="pb-4 border-b border-border/50">
+         <CardTitle className="text-base font-bold flex items-center gap-2">
+           <Clock size={18} className="text-primary" /> Dashboard Staf
+         </CardTitle>
+         <CardDescription className="text-xs">
+           Rentang hari yang ditampilkan di dashboard untuk akun Staf.
+         </CardDescription>
+       </CardHeader>
+       <CardContent className="p-4 space-y-2">
+         <Label className="text-sm font-semibold">Tampilkan Order (hari terakhir)</Label>
+         <Input
+           name="dashboard_window_days"
+           type="number"
+           min={1}
+           max={90}
+           value={dashboardWindowDays}
+           onChange={(e) => setDashboardWindowDays(e.target.value)}
+           className="h-11 bg-background"
+           placeholder="7"
+         />
+         <p className="text-xs text-muted-foreground">
+           Staf hanya melihat order dalam rentang hari ini di dashboard mereka. Pemilik/Admin tetap melihat data sejak awal.
+         </p>
+       </CardContent>
+     </Card>
 
       {/* 2. KARTU FORMAT PENOMORAN */}
       <Card className="shadow-sm border-border">
@@ -182,7 +280,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         )}
         
         {saved && !error && (
-          <div className="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm font-medium animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-start gap-2 p-3 bg-success/10 border border-success/20 text-success rounded-lg text-sm font-medium animate-in fade-in slide-in-from-bottom-2">
             <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
             <p>Pengaturan berhasil disimpan!</p>
           </div>

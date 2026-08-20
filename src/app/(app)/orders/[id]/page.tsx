@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/orders/[id]/page.tsx
+// coteadmin/src/app/(app)/orders/[id]/page.tsx
 import { cotebek } from '@/lib/cotebek';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,11 +14,13 @@ import {
   Printer
 } from 'lucide-react';
 import { OrderActionButtons } from './OrderActionButtons';
+import { STATUS_CONFIG } from '@/lib/constants/order-status';
 
 type OrderItem = { id: string; itemName: string; qty: number; subtotal: number };
 type OrderDetail = {
   id: string;
   orderNumber: string;
+  trackingToken: string | null;
   status: string;
   totalAmount: number;
   discountAmount: number;
@@ -36,14 +38,6 @@ type OrderDetail = {
   paymentStatus: 'PAID' | 'UNPAID';
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  RECEIVED: { label: 'Diterima', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200' },
-  IN_PROCESS: { label: 'Diproses', color: 'bg-primary/10 text-primary hover:bg-primary/20 border-primary/20' },
-  READY: { label: 'Siap Diambil', color: 'bg-secondary/20 text-secondary-foreground hover:bg-secondary/30 border-secondary/30' },
-  DONE: { label: 'Selesai', color: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-emerald-200' },
-  CANCELLED: { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20' },
-};
-
 type TrackingData = { statusHistory: { status: string | null; timestamp: string }[] };
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -54,7 +48,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const trackRes = await cotebek<{ data: TrackingData }>(`/orders/track/${order.orderNumber}`);
   const statusHistory = trackRes.data.statusHistory;
 
-  const statusVisual = STATUS_CONFIG[order.status] || { label: order.status, color: 'bg-gray-100 text-gray-700' };
+  const statusVisual = STATUS_CONFIG[order.status] || { label: order.status, color: 'bg-muted text-muted-foreground' };
 
   return (
     <div className="p-4 pb-24 space-y-5">
@@ -196,12 +190,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         </Card>
 
         {order.metadata?.note ? (
-          <Card className="shadow-sm bg-yellow-50/50 border-yellow-200">
+          <Card className="shadow-sm bg-warning/10 border-warning/30">
             <CardContent className="p-3">
-              <div className="text-[10px] text-yellow-700 uppercase tracking-wider font-semibold mb-1">
+              <div className="text-[10px] text-warning uppercase tracking-wider font-semibold mb-1">
                 Catatan
               </div>
-              <div className="text-xs text-yellow-900 leading-relaxed italic">
+              <div className="text-xs text-foreground leading-relaxed italic">
                 "{order.metadata.note}"
               </div>
             </CardContent>
@@ -229,6 +223,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           customerName={order.customerName}
           customerPhone={order.customerPhone}
           orderNumber={order.orderNumber}
+          trackingToken={order.trackingToken}
           createdAt={order.createdAt}
           statusHistory={statusHistory}
         />

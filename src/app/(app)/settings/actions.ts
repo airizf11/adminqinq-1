@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/settings/actions.ts
+// coteadmin/src/app/(app)/settings/actions.ts
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -13,6 +13,12 @@ export async function saveSettings(formData: FormData) {
   const businessAddress = (formData.get("business_address") as string)?.trim();
   const businessPhone = (formData.get("business_phone") as string)?.trim();
   const receiptFooter = (formData.get("receipt_footer") as string)?.trim();
+  const businessType = (formData.get("business_type") as string)?.trim();
+  const primaryColor = (formData.get("primary_color") as string)?.trim();
+  const websiteUrl = (formData.get("website_url") as string)?.trim();
+  const dashboardWindowDays = (
+    formData.get("dashboard_window_days") as string
+  )?.trim();
 
   try {
     await cotebek("/app-settings/bulk", {
@@ -25,6 +31,10 @@ export async function saveSettings(formData: FormData) {
           { key: "business_address", value: businessAddress },
           { key: "business_phone", value: businessPhone },
           { key: "receipt_footer", value: receiptFooter },
+          { key: "business_type", value: businessType },
+          { key: "primary_color", value: primaryColor },
+          { key: "website_url", value: websiteUrl },
+          { key: "dashboard_window_days", value: dashboardWindowDays },
         ],
       },
     });

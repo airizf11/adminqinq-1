@@ -5,23 +5,29 @@ import { Metadata } from 'next';
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from 'sonner';
+import { getBranding } from '@/lib/branding';
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
-export const metadata: Metadata = {
-  title: 'Qinq Laundry System',
+export async function generateMetadata(): Promise<Metadata> {
+  const b = await getBranding();
+  return {
+    title: `${b.businessName} System`,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: b.businessName,
+    },
+  };
+}
 
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Laundry',
-  },
-};
+export const dynamic = 'force-dynamic';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const b = await getBranding();
   return (
     <html lang="id" className={cn("font-sans", inter.variable)}>
-      <body>
+      <body style={{ '--primary': b.primaryColor } as React.CSSProperties}>
         <Providers>{children}</Providers>
         <Toaster richColors position="top-center" />
       </body>

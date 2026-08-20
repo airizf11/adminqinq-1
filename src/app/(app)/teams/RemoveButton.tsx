@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { removeMember } from './actions';
+import { Button } from '@/components/ui/button';
 
 export function RemoveButton({ appId, userId }: { appId: string; userId: string }) {
   const [pending, setPending] = useState(false);
@@ -15,15 +16,21 @@ export function RemoveButton({ appId, userId }: { appId: string; userId: string 
   }
 
   if (!confirming) {
-    return <button onClick={() => setConfirming(true)} className="text-xs text-red-500">Hapus</button>;
+    return (
+      <Button variant="link" size="sm" onClick={() => setConfirming(true)} className="h-auto p-0 text-xs text-destructive">
+        Hapus
+      </Button>
+    );
   }
 
   return (
-    <span className="text-xs">
-      <button onClick={handleRemove} disabled={pending} className="text-red-600 font-medium mr-2">
+    <span className="text-xs flex items-center gap-2">
+      <Button variant="link" size="sm" onClick={handleRemove} disabled={pending} className="h-auto p-0 text-xs text-destructive font-medium">
         {pending ? '...' : 'Ya'}
-      </button>
-      <button onClick={() => setConfirming(false)} className="text-gray-400">Batal</button>
+      </Button>
+      <Button variant="link" size="sm" onClick={() => setConfirming(false)} className="h-auto p-0 text-xs text-muted-foreground">
+        Batal
+      </Button>
     </span>
   );
 }

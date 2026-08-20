@@ -3,6 +3,11 @@
 
 import { useState } from 'react';
 import { updateItem, toggleItemActive } from './actions';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { ItemFormFields } from '../ItemFormFields';
+import { Loader2 } from 'lucide-react';
 
 type Item = { id: string; name: string; sku: string | null; price: number; cogs: number; category: string | null; isActive: boolean };
 
@@ -23,8 +28,7 @@ export function ItemDetail({ item }: { item: Item }) {
     else setSaved(true);
   }
 
-  async function handleToggle() {
-    const next = !isActive;
+  async function handleToggle(next: boolean) {
     setTogglePending(true);
     const result = await toggleItemActive(item.id, next);
     setTogglePending(false);
@@ -34,47 +38,31 @@ export function ItemDetail({ item }: { item: Item }) {
 
   return (
     <div className="space-y-4">
-      <div className="border rounded-lg p-3 flex justify-between items-center">
-        <div>
-          <div className="font-medium text-sm">Status Layanan</div>
-          <div className="text-xs text-gray-500">
-            {isActive ? 'Aktif — bisa dipilih di order baru' : 'Nonaktif — sementara gak muncul di order baru'}
+      <Card className="shadow-sm">
+        <CardContent className="p-3 flex justify-between items-center">
+          <div>
+            <div className="font-medium text-sm text-foreground">Status Item</div>
+            <div className="text-xs text-muted-foreground">
+              {isActive ? 'Aktif — bisa dipilih di order baru' : 'Nonaktif — sementara gak muncul di order baru'}
+            </div>
           </div>
-        </div>
-        <button
-          onClick={handleToggle}
-          disabled={togglePending}
-          className={`w-12 h-7 rounded-full relative transition-colors ${isActive ? 'bg-green-600' : 'bg-gray-300'} disabled:opacity-50`}
-        >
-          <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform ${isActive ? 'translate-x-5' : ''}`} />
-        </button>
-      </div>
+          <Switch checked={isActive} onCheckedChange={handleToggle} disabled={togglePending} />
+        </CardContent>
+      </Card>
 
-      <form action={handleSubmit} className="space-y-4">
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Nama layanan</label>
-          <input name="name" required defaultValue={item.name} className="w-full border rounded-lg p-2.5" />
-        </div>
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Harga (Rp)</label>
-          <input name="price" type="number" min="0" required defaultValue={item.price} className="w-full border rounded-lg p-2.5" />
-        </div>
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Kategori</label>
-          <input name="category" defaultValue={item.category ?? ''} className="w-full border rounded-lg p-2.5" />
-        </div>
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Modal / COGS</label>
-          <input name="cogs" type="number" min="0" defaultValue={item.cogs} className="w-full border rounded-lg p-2.5" />
-        </div>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        {saved && !error && <p className="text-sm text-green-600">Tersimpan.</p>}
-
-        <button type="submit" disabled={pending} className="w-full bg-black text-white rounded-lg p-3 font-medium disabled:opacity-50">
-          {pending ? 'Menyimpan...' : 'Simpan Perubahan'}
-        </button>
-      </form>
+      <Card className="shadow-sm">
+        <CardContent className="p-4">
+          <form action={handleSubmit} className="space-y-4">
+            <ItemFormFields defaultValues={item} />
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            {saved && !error && <p className="text-sm text-success">Tersimpan.</p>}
+            <Button type="submit" disabled={pending} className="w-full h-11 font-medium">
+              {pending && <Loader2 size={16} className="mr-2 animate-spin" />}
+              {pending ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

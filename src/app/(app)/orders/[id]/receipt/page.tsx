@@ -1,11 +1,14 @@
-// adminqinq/src/app/(app)/orders/[id]/receipt/page.tsx
+// coteadmin/src/app/(app)/orders/[id]/receipt/page.tsx
 import { cotebek } from '@/lib/cotebek';
-import { PrintButton } from './PrintButton';
+// import { PrintButton } from './PrintButton';
+import { BlePrintButton } from './BlePrintButton';
+import { ReceiptWaButton } from './ReceiptWaButton';
 
-type ReceiptData = {
+export type ReceiptData = {
   business: { name: string; address: string | null; phone: string | null; footer: string };
-  order: { orderNumber: string; paymentMethod: string; createdAt: string; paymentStatus: 'PAID' | 'UNPAID' };
-  customer: { name: string | null };
+  order: { orderNumber: string; trackingToken: string | null; paymentMethod: string; paymentStatus: 'PAID' | 'UNPAID'; createdAt: string; dueDate: string | null;
+     handledByName: string | null; };
+  customer: { name: string | null; phone: string | null };
   items: { itemName: string; qty: number; price: number; subtotal: number }[];
   summary: { subtotal: number; discountAmount: number; promoName: string | null; total: number };
 };
@@ -17,7 +20,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="p-4">
-      <PrintButton />
+      <BlePrintButton data={r} />
+
+      <ReceiptWaButton data={r} customerPhone={r.customer.phone} />
 
       <style>{`@page { size: 58mm auto; margin: 2mm; }`}</style>
 
@@ -30,6 +35,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
         <div className="border-t border-dashed border-black py-2 space-y-0.5">
           <div className="flex justify-between"><span>No. Order</span><span>{r.order.orderNumber}</span></div>
+          {r.order.trackingToken && (
+           <div className="flex justify-between"><span>Kode Lacak</span><span>{r.order.trackingToken}</span></div>
+         )}
           <div className="flex justify-between"><span>Tanggal</span><span>{new Date(r.order.createdAt).toLocaleString('id-ID')}</span></div>
           {r.customer.name && <div className="flex justify-between"><span>Customer</span><span>{r.customer.name}</span></div>}
         </div>
@@ -63,6 +71,10 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
            <span>Status</span>
            <span>{r.order.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM LUNAS'}</span>
          </div>
+
+         {r.order.handledByName && (
+          <div className="flex justify-between"><span>Kasir</span><span>{r.order.handledByName}</span></div>
+        )}
         </div>
 
         <div className="border-t border-dashed border-black pt-2 text-center">{r.business.footer}</div>

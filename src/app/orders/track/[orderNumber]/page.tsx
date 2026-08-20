@@ -1,4 +1,4 @@
-// adminqinq/src/app/track/[orderNumber]/page.tsx
+// coteadmin/src/app/track/[orderNumber]/page.tsx
 import { cotebek } from '@/lib/cotebek';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -123,11 +123,11 @@ export default async function TrackOrderPage({ params }: { params: Promise<{ ord
           </div>
         ) : (
           data.paymentStatus === 'UNPAID' && (
-            <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-800 shadow-sm">
-              <AlertCircle size={20} className="shrink-0 mt-0.5 text-yellow-600" />
+            <div className="flex items-start gap-3 p-4 bg-warning/10 border border-warning/30 rounded-xl text-warning shadow-sm">
+              <AlertCircle size={20} className="shrink-0 mt-0.5 text-warning" />
               <div>
-                <h3 className="font-semibold text-sm text-yellow-700">Belum Lunas</h3>
-                <p className="text-xs mt-1 text-yellow-700/80">Mohon siapkan pembayaran saat pengambilan cucian nanti ya.</p>
+                <h3 className="font-semibold text-sm text-warning">Belum Lunas</h3>
+                <p className="text-xs mt-1 text-warning/80">Mohon siapkan pembayaran saat pengambilan pesanan nanti ya.</p>
               </div>
             </div>
           )
@@ -154,7 +154,7 @@ export default async function TrackOrderPage({ params }: { params: Promise<{ ord
                       {/* Titik / Indikator */}
                       <div className={cn(
                         "absolute -left-[11px] top-0 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300",
-                        isPast ? "bg-emerald-500 ring-4 ring-emerald-500/20 text-white" :
+                        isPast ? "bg-success ring-4 ring-success/20 text-success-foreground" :
                         isActive ? "bg-primary ring-4 ring-primary/20 text-primary-foreground shadow-[0_0_15px_rgba(var(--primary),0.5)]" :
                         "bg-muted border-2 border-background"
                       )} aria-hidden="true">

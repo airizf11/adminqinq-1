@@ -1,18 +1,20 @@
 // adminqinq/src/app/(app)/layout.tsx
 import Link from 'next/link';
-import { Home, ClipboardList, Zap, Users, Menu } from 'lucide-react';
+import { Zap } from 'lucide-react';
+import { getBranding, NAV_PRESETS } from '@/lib/branding';
+import { cotebek } from '@/lib/cotebek';
+import { NoAccessScreen } from './NoAccessScreen';
 
-const LEFT_ITEMS = [
-  { href: '/dashboard', label: 'Overview', icon: Home },
-  { href: '/orders', label: 'Order', icon: ClipboardList },
-];
+export const dynamic = 'force-dynamic';
 
-const RIGHT_ITEMS = [
-  { href: '/customers', label: 'Cust', icon: Users },
-  { href: '/more', label: 'More', icon: Menu },
-];
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const b = await getBranding();
+  const nav = NAV_PRESETS[b.businessType];
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const membership = await cotebek<{ data: { isMember: boolean; role: string | null } }>('/auth/membership');
+  if (!membership.data.isMember) {
+    return <NoAccessScreen businessName={b.businessName} phone={b.phone} />;
+  }
   return (
     <div className="min-h-screen pb-20 bg-background text-foreground flex flex-col">
       {/* HEADER ATAS (Sticky) 
@@ -21,7 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 print:hidden">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="font-heading font-bold text-xl text-primary tracking-tight">
-            Qinq <span className="text-secondary-foreground">Laundry</span>
+            {b.businessName}
           </div>
           {/* Tempat untuk letak Toggle Bahasa nanti */}
         </div>
@@ -31,7 +33,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* BOTTOM NAVIGATION (Mobile-First) */}
       <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-background flex items-center justify-around px-2 py-2 print:hidden z-50">
-        {LEFT_ITEMS.map(({ href, label, icon: Icon }) => (
+        {nav.left.map(({ href, label, icon: Icon }) => (
           <Link 
             key={href} 
             href={href} 
@@ -45,19 +47,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* TOMBOL INPUT BESAR 
           Kita pakai bg-secondary (Warna Gold) agar kontras dengan warna Navy
         */}
-        <Link 
-          href="/orders/new" 
-          className="flex flex-col items-center -mt-6 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
-        >
+        <Link href={nav.fab.href} className="flex flex-col items-center -mt-6 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full">
           <span className="w-14 h-14 rounded-full bg-primary text-secondary-foreground flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-200">
             <Zap size={24} className="fill-current" />
           </span>
           <span className="text-[10px] text-muted-foreground mt-1 font-medium group-hover:text-primary transition-colors">
-            Input
+            {nav.fab.label}
           </span>
         </Link>
 
-        {RIGHT_ITEMS.map(({ href, label, icon: Icon }) => (
+        {nav.right.map(({ href, label, icon: Icon }) => (
           <Link 
             key={href} 
             href={href} 

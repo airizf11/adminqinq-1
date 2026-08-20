@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createTransaction } from '../actions';
+import { createTransaction } from '../../transactions/actions';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

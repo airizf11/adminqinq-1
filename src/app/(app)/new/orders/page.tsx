@@ -39,7 +39,7 @@ export default async function NewOrderPage() {
           <h1 className="text-xl font-heading font-bold text-foreground tracking-tight">
             Order Baru
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Catat transaksi laundry pelanggan.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Catat transaksi usaha kamu.</p>
         </div>
       </div>
 
@@ -51,7 +51,7 @@ export default async function NewOrderPage() {
           </div>
           <h2 className="text-foreground font-medium">Belum ada layanan/item</h2>
           <p className="text-sm text-muted-foreground mt-1 max-w-[250px] mb-6">
-            Kamu harus menambahkan setidaknya satu layanan laundry (seperti Cuci Kiloan) sebelum bisa membuat order.
+            Kamu harus menambahkan setidaknya satu layanan/item (misal Cuci Kiloan, Nasi Goreng) sebelum bisa membuat order.
           </p>
           <Link 
             href="/items" 

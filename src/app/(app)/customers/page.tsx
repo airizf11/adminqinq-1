@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/customers/page.tsx
+// coteadmin/src/app/(app)/customers/page.tsx
 import Link from 'next/link';
 import { cotebek } from '@/lib/cotebek';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,16 +11,32 @@ import {
   Users, 
   MapPin, 
   Phone, 
-  User 
+  User, 
+  UserRound
 } from 'lucide-react';
 
-type Customer = { id: string; name: string; phone: string; city: string | null };
+type Customer = {
+  id: string;
+  name: string;
+  phone: string;
+  city: string | null;
+  gender: 'MALE' | 'FEMALE' | 'OTHER' | null };
 
 function waLink(phone: string) {
   const digits = phone.replace(/\D/g, '');
   const normalized = digits.startsWith('0') ? '62' + digits.slice(1) : digits;
   return `https://wa.me/${normalized}`;
 }
+
+function genderStyle(gender: Customer['gender']) {
+   if (gender === 'MALE') {
+     return { icon: User, bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-l-blue-400' };
+   }
+   if (gender === 'FEMALE') {
+     return { icon: UserRound, bg: 'bg-pink-100', text: 'text-pink-600', border: 'border-l-pink-400' };
+   }
+   return { icon: User, bg: 'bg-primary/10', text: 'text-primary', border: 'border-l-border' };
+ }
 
 export default async function CustomersPage() {
   const res = await cotebek<{ data: Customer[] }>('/customers');
@@ -33,7 +49,7 @@ export default async function CustomersPage() {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-heading font-bold text-primary tracking-tight">Pelanggan</h1>
-          <p className="text-sm text-muted-foreground mt-1">Daftar kontak pelanggan laundry.</p>
+          <p className="text-sm text-muted-foreground mt-1">Daftar kontak pelanggan.</p>
         </div>
         <Link 
           href="/customers/new" 
@@ -63,7 +79,10 @@ export default async function CustomersPage() {
       <ul className="grid gap-3" aria-label="Daftar Pelanggan">
         {customers.map((c) => (
           <li key={c.id}>
-            <Card className="relative group overflow-hidden border-border hover:border-primary/40 shadow-sm hover:shadow-md transition-all duration-200">
+            <Card className={cn(
+             "relative group overflow-hidden border-border hover:border-primary/40 shadow-sm hover:shadow-md transition-all duration-200 border-l-4",
+             genderStyle(c.gender).border,
+           )}>
               
               {/* LINK DETAIL PELANGGAN (Hitbox merentang ke seluruh Card) */}
               <Link 
@@ -77,9 +96,15 @@ export default async function CustomersPage() {
               <CardContent className="p-3 flex items-center gap-3">
                 
                 {/* AVATAR PLACEHOLDER */}
-                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0" aria-hidden="true">
-                  <User size={20} />
-                </div>
+                {(() => {
+                 const style = genderStyle(c.gender);
+                 const Icon = style.icon;
+                 return (
+                   <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shrink-0", style.bg, style.text)} aria-hidden="true">
+                     <Icon size={20} />
+                   </div>
+                 );
+               })()}
 
                 {/* INFO TEXT */}
                 <div className="flex-1 min-w-0">

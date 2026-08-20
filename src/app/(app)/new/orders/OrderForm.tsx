@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { createOrder } from '../actions';
+import { createOrder } from '../../orders/actions';
 import { CustomerMatch } from './customer-actions';
 import { CustomerPicker } from './CustomerPicker';
 import { checkPromo, PromoCheckResult } from './promo-actions';
@@ -214,7 +214,7 @@ export function OrderForm({ items, promos, teamMembers }: { items: Item[]; promo
             {promoChecking && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 size={12} className="animate-spin"/> Mengecek promo...</p>}
             {promoError && <p className="text-xs text-destructive">{promoError}</p>}
             {appliedPromo && !promoChecking && (
-              <p className="text-xs text-emerald-600 font-medium">✨ Asik! Hemat Rp{appliedPromo.discountAmount.toLocaleString('id-ID')}</p>
+              <p className="text-xs text-success font-medium">✨ Asik! Hemat Rp{appliedPromo.discountAmount.toLocaleString('id-ID')}</p>
             )}
           </div>
         )}
@@ -270,7 +270,7 @@ export function OrderForm({ items, promos, teamMembers }: { items: Item[]; promo
               type="button"
               variant={paymentStatus === 'PAID' ? 'default' : 'outline'}
               onClick={() => setPaymentStatus('PAID')}
-              className={paymentStatus === 'PAID' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm' : ''}
+              className={paymentStatus === 'PAID' ? 'bg-success hover:bg-success/90 text-success-foreground text-white shadow-sm' : ''}
             >
               {paymentStatus === 'PAID' ? <CheckCircle2 size={16} className="mr-2"/> : <Circle size={16} className="mr-2 text-muted-foreground"/>}
               Sudah Lunas
@@ -308,7 +308,7 @@ export function OrderForm({ items, promos, teamMembers }: { items: Item[]; promo
             <span className="font-medium">Rp{totalAmount.toLocaleString('id-ID')}</span>
           </div>
           {appliedPromo && (
-            <div className="flex justify-between text-sm text-emerald-600">
+            <div className="flex justify-between text-sm text-success">
               <span>Diskon</span>
               <span className="font-medium">-Rp{appliedPromo.discountAmount.toLocaleString('id-ID')}</span>
             </div>

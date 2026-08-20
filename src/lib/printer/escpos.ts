@@ -104,4 +104,153 @@ export class EscPos {
       this.lf(4),
     );
   }
+
+  static receipt(data: {
+    business: {
+      name: string;
+      address: string | null;
+      phone: string | null;
+      footer: string;
+    };
+    order: {
+      orderNumber: string;
+      paymentMethod: string;
+      paymentStatus: "PAID" | "UNPAID";
+      createdAt: string;
+      dueDate: string | null;
+      handledByName: string | null;
+      trackingToken?: string | null;
+    };
+    customer: { name: string | null };
+    items: { itemName: string; qty: number; price: number; subtotal: number }[];
+    summary: {
+      subtotal: number;
+      discountAmount: number;
+      promoName: string | null;
+      total: number;
+    };
+  }): Uint8Array {
+    const WIDTH = 32;
+    const rp = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
+    const line = (left: string, right: string) => {
+      const maxLeftWidth = WIDTH - right.length - 1;
+      const truncatedLeft =
+        left.length > maxLeftWidth
+          ? left.slice(0, Math.max(maxLeftWidth - 1, 0)) + "…"
+          : left;
+      const space = WIDTH - truncatedLeft.length - right.length;
+      return truncatedLeft + " ".repeat(Math.max(space, 1)) + right;
+    };
+    const divider = "-".repeat(WIDTH);
+
+    const parts: Uint8Array[] = [this.init()];
+
+    // Nama bisnis — besar, tengah
+    parts.push(this.alignCenter(), this.bold(true), this.doubleSize(true));
+    parts.push(this.text(data.business.name), this.lf());
+    parts.push(this.doubleSize(false), this.bold(false));
+
+    // Detil usaha — kecil, tengah
+    if (data.business.address)
+      parts.push(this.text(data.business.address), this.lf());
+    if (data.business.phone)
+      parts.push(this.text(data.business.phone), this.lf());
+
+    parts.push(this.alignLeft(), this.text(divider), this.lf());
+
+    // Nama customer — besar, tengah
+    if (data.customer.name) {
+      parts.push(this.alignCenter(), this.bold(true), this.doubleSize(true));
+      parts.push(this.text(data.customer.name), this.lf());
+      parts.push(this.doubleSize(false), this.bold(false));
+      parts.push(this.alignLeft(), this.text(divider), this.lf());
+    }
+
+    // No order, tanggal, estimasi selesai — kecil, justify
+    parts.push(this.text(line("No. Order", data.order.orderNumber)), this.lf());
+    if (data.order.trackingToken) {
+      parts.push(
+        this.text(line("Kode Lacak", data.order.trackingToken)),
+        this.lf(),
+      );
+    }
+    parts.push(
+      this.text(
+        line(
+          "Tanggal",
+          new Date(data.order.createdAt).toLocaleDateString("id-ID"),
+        ),
+      ),
+      this.lf(),
+    );
+    if (data.order.dueDate) {
+      parts.push(
+        this.text(
+          line(
+            "Estimasi Selesai",
+            new Date(data.order.dueDate).toLocaleDateString("id-ID"),
+          ),
+        ),
+        this.lf(),
+      );
+    }
+    parts.push(this.text(divider), this.lf());
+
+    // Item
+    for (const item of data.items) {
+      parts.push(this.text(item.itemName), this.lf());
+      parts.push(
+        this.text(line(`${item.qty} x ${rp(item.price)}`, rp(item.subtotal))),
+        this.lf(),
+      );
+    }
+    parts.push(this.text(divider), this.lf());
+
+    // Total, bayar, status, kasir
+    parts.push(
+      this.text(line("Subtotal", rp(data.summary.subtotal))),
+      this.lf(),
+    );
+    if (data.summary.discountAmount > 0) {
+      const label =
+        "Diskon" +
+        (data.summary.promoName ? ` (${data.summary.promoName})` : "");
+      parts.push(
+        this.text(line(label, `-${rp(data.summary.discountAmount)}`)),
+        this.lf(),
+      );
+    }
+    parts.push(
+      this.bold(true),
+      this.text(line("Total", rp(data.summary.total))),
+      this.lf(),
+      this.bold(false),
+    );
+    parts.push(this.text(line("Bayar", data.order.paymentMethod)), this.lf());
+    parts.push(this.bold(true));
+    parts.push(
+      this.text(
+        line(
+          "Status",
+          data.order.paymentStatus === "PAID" ? "LUNAS" : "BELUM LUNAS",
+        ),
+      ),
+      this.lf(),
+    );
+    parts.push(this.bold(false));
+    if (data.order.handledByName) {
+      parts.push(this.text(line("Kasir", data.order.handledByName)), this.lf());
+    }
+
+    parts.push(this.text(divider), this.lf());
+
+    // Footer — multiline, tengah
+    parts.push(this.alignCenter());
+    for (const fLine of data.business.footer.split("\n")) {
+      parts.push(this.text(fLine), this.lf());
+    }
+    parts.push(this.lf(2), this.cut());
+
+    return this.concat(...parts);
+  }
 }

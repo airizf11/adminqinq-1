@@ -28,6 +28,12 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -50,46 +56,230 @@
 }
 
 :root {
-    /* Jika nanti mau ada Dark Mode, base-nya dibalik jadi Navy gelap */
-  --background: #0a192f; /* Navy sangat gelap */
-  --foreground: #f8fafc;
-  --card: #0f2744;
-  --card-foreground: #f8fafc;
-  --popover: #0f2744;
-  --popover-foreground: #f8fafc;
-  
-  /* Di dark mode, warna utamanya jadi Gold biar stand out */
-  --primary: #f0a500;
-  --primary-foreground: #0f2744;
-  --secondary: #1e4976; /* brand-navy-light */
-  --secondary-foreground: #ffffff;
-  --muted: #1a3a5c;
-  --muted-foreground: #94a3b8;
-  --accent: #1a3a5c;
-  --accent-foreground: #f8fafc;
-  --destructive: oklch(0.704 0.191 22.216);
+  /* =========================
+     LIGHT MODE — DEFAULT
+     ========================= */
+
+  /* Surfaces */
+  --background: #dfedfc;
+  --foreground: #0f172a;
+
+  --card: #d1dfff;
+  --card-foreground: #0f172a;
+
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  --surface-raised: #ffffff;
+  --surface-subtle: #f1f5f9;
+  --surface-muted: #e9eef4;
+
+  /* Brand / Primary */
+  --primary: #d88900;
+  --primary-foreground: #ffffff;
+  --primary-hover: #b97200;
+  --primary-active: #9d6200;
+  --primary-subtle: #fff4d6;
+
+  /* Secondary */
+  --secondary: #e8eef5;
+  --secondary-foreground: #18324d;
+  --secondary-hover: #dce5ee;
+  --secondary-active: #cfdbe7;
+
+  /* Muted */
+  --muted: #eef2f6;
+  --muted-foreground: #64748b;
+
+  /* Accent */
+  --accent: #fff4d6;
+  --accent-foreground: #7a4b00;
+  --accent-hover: #ffedb5;
+  --accent-active: #ffe39a;
+
+  /* Borders / Inputs */
+  --border: #d7e0e9;
+  --border-strong: #c3cfdb;
+  --input: #d7e0e9;
+  --input-hover: #b8c6d4;
+
+  /* Focus */
+  --ring: #d88900;
+  --ring-offset: #ffffff;
+
+  /* Text hierarchy */
+  --foreground-subtle: #334155;
+  --foreground-muted: #64748b;
+  --foreground-disabled: #94a3b8;
+
+  /* Interaction */
+  --hover-overlay: rgba(15, 23, 42, 0.04);
+  --active-overlay: rgba(15, 23, 42, 0.08);
+  --disabled-bg: #f1f5f9;
+  --disabled-foreground: #94a3b8;
+
+  /* Destructive */
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #1e4976;
-  --input: #1e4976;
-  --ring: #f0a500;
+  --destructive-hover: #b91c1c;
+  --destructive-active: #991b1b;
+  --destructive-subtle: #fef2f2;
 
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Success */
+  --success: #059669;
+  --success-foreground: #ffffff;
+  --success-subtle: #ecfdf5;
 
-  --sidebar: #0a192f;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #f0a500;
-  --sidebar-primary-foreground: #0a192f;
-  --sidebar-accent: #1e4976;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #1e4976;
-  --sidebar-ring: #f0a500;
-  }
+  /* Warning */
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --warning-subtle: #fffbeb;
+
+  /* Info */
+  --info: #2563eb;
+  --info-foreground: #ffffff;
+  --info-subtle: #eff6ff;
+
+  /* Charts */
+  --chart-1: #059669;
+  --chart-2: #2563eb;
+  --chart-3: #7c3aed;
+  --chart-4: #ea580c;
+  --chart-5: #db2777;
+
+  /* Sidebar */
+  --sidebar: #f1f5f9;
+  --sidebar-foreground: #0f172a;
+
+  --sidebar-primary: #d88900;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #e2e8f0;
+  --sidebar-accent-foreground: #18324d;
+
+  --sidebar-border: #d7e0e9;
+  --sidebar-ring: #d88900;
+
+  /* Sidebar states */
+  --sidebar-hover: #e8eef5;
+  --sidebar-active: #dce5ee;
+  --sidebar-selected: #fff4d6;
+  --sidebar-selected-foreground: #7a4b00;
+}
+
 
 @media (prefers-color-scheme: dark) {
+  :root {
+    /* =========================
+       DARK MODE
+       ========================= */
+
+    /* Surfaces */
+    --background: #07111f;
+    --foreground: #f1f5f9;
+
+    --card: #10233d;
+    --card-foreground: #f1f5f9;
+
+    --popover: #10233d;
+    --popover-foreground: #f1f5f9;
+
+    --surface-raised: #132a47;
+    --surface-subtle: #0d2037;
+    --surface-muted: #142f4d;
+
+    /* Brand / Primary */
+    --primary: #f0a500;
+    --primary-foreground: #0a192f;
+    --primary-hover: #ffb82e;
+    --primary-active: #d99100;
+    --primary-subtle: #3a2b0c;
+
+    /* Secondary */
+    --secondary: #193b60;
+    --secondary-foreground: #f8fafc;
+    --secondary-hover: #214a73;
+    --secondary-active: #163451;
+
+    /* Muted */
+    --muted: #142f4d;
+    --muted-foreground: #9aaabd;
+
+    /* Accent */
+    --accent: #263d55;
+    --accent-foreground: #f8fafc;
+    --accent-hover: #304b66;
+    --accent-active: #1f344a;
+
+    /* Borders / Inputs */
+    --border: #294967;
+    --border-strong: #3b5c79;
+    --input: #294967;
+    --input-hover: #3b5c79;
+
+    /* Focus */
+    --ring: #f0a500;
+    --ring-offset: #0a192f;
+
+    /* Text hierarchy */
+    --foreground-subtle: #cbd5e1;
+    --foreground-muted: #9aaabd;
+    --foreground-disabled: #64748b;
+
+    /* Interaction */
+    --hover-overlay: rgba(248, 250, 252, 0.05);
+    --active-overlay: rgba(248, 250, 252, 0.09);
+    --disabled-bg: #10233d;
+    --disabled-foreground: #64748b;
+
+    /* Destructive */
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --destructive-hover: #f87171;
+    --destructive-active: #dc2626;
+    --destructive-subtle: #3b1518;
+
+    /* Success */
+    --success: #10b981;
+    --success-foreground: #ffffff;
+    --success-subtle: #0b3028;
+
+    /* Warning */
+    --warning: #f59e0b;
+    --warning-foreground: #172033;
+    --warning-subtle: #3a2b0c;
+
+    /* Info */
+    --info: #3b82f6;
+    --info-foreground: #ffffff;
+    --info-subtle: #102a4d;
+
+    /* Charts */
+    --chart-1: #34d399;
+    --chart-2: #60a5fa;
+    --chart-3: #a78bfa;
+    --chart-4: #fb923c;
+    --chart-5: #fb7185;
+
+    /* Sidebar */
+    --sidebar: #081525;
+    --sidebar-foreground: #f1f5f9;
+
+    --sidebar-primary: #f0a500;
+    --sidebar-primary-foreground: #081525;
+
+    --sidebar-accent: #193b60;
+    --sidebar-accent-foreground: #f8fafc;
+
+    --sidebar-border: #294967;
+    --sidebar-ring: #f0a500;
+
+    /* Sidebar states */
+    --sidebar-hover: #10233d;
+    --sidebar-active: #142f4d;
+    --sidebar-selected: #3a2b0c;
+    --sidebar-selected-foreground: #ffd166;
+  }
 }
 
 @layer base {

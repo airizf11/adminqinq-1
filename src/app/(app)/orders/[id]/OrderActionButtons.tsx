@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/orders/[id]/OrderActionButtons.tsx
+// coteadmin/src/app/(app)/orders/[id]/OrderActionButtons.tsx
 'use client';
 
 import { useState } from 'react';
@@ -17,6 +17,7 @@ import {
   PackageCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { buildOrderUpdateMessage } from '@/lib/wa-templates';
 
 // --- DATA & CONFIG ---
 const PAYMENT_METHODS = ['Tunai', 'Transfer Bank', 'QRIS', 'E-Wallet'];
@@ -46,14 +47,6 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Dibatalkan',
 };
 
-const STATUS_MESSAGE: Record<string, string> = {
-  RECEIVED: 'Cucian Anda sudah kami terima dan akan segera diproses ya 🙏',
-  IN_PROCESS: 'Cucian Anda sedang dalam proses pengerjaan.',
-  READY: 'Cucian Anda sudah *SIAP DIAMBIL*! Silakan mampir ke toko kami ya 😊',
-  DONE: 'Terima kasih, cucian sudah diambil. Sampai jumpa lagi! 🙏',
-  CANCELLED: 'Order ini telah dibatalkan.',
-};
-
 // --- HELPER FUNCTION ---
 function waLink(phone: string, text: string) {
   const digits = phone.replace(/\D/g, '');
@@ -70,6 +63,7 @@ type OrderActionButtonsProps = {
   customerName: string | null;
   customerPhone: string | null;
   orderNumber: string;
+  trackingToken: string | null;
   createdAt: string;
   statusHistory: { status: string | null; timestamp: string }[];
 };
@@ -119,22 +113,14 @@ export function OrderActionButtons(props: OrderActionButtonsProps) {
     .map((s) => `✓ ${s.label} - ${new Date(s.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}`)
     .join('\n');
 
-  const waMessage = [
-    `Halo${props.customerName ? ` ${props.customerName}` : ''}! 👋`,
-    '',
-    `Update untuk order *${props.orderNumber}*:`,
-    '',
-    timelineText,
-    '',
-    STATUS_MESSAGE[props.currentStatus] ?? '',
-    '',
-    props.paymentStatus === 'UNPAID' ? '\n💰 *Belum lunas* — jangan lupa bawa uangnya saat pengambilan ya!' : '',
-    '',
-    `Cek status detail kapan saja di:`,
-    `${process.env.NEXT_PUBLIC_APP_URL}/track/${props.orderNumber}`,
-    '',
-    'Terima kasih! 🙏',
-  ].join('\n');
+  const waMessage = buildOrderUpdateMessage({
+   customerName: props.customerName,
+   orderNumber: props.orderNumber,
+   trackingToken: props.trackingToken,
+   currentStatus: props.currentStatus,
+   paymentStatus: props.paymentStatus,
+   timelineText,
+ });
 
   const statusOptions = TRANSITIONS[props.currentStatus] ?? [];
 

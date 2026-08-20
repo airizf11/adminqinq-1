@@ -1,4 +1,4 @@
-// adminqinq/src/lib/session.ts
+// coteadmin/src/lib/session.ts
 import { cookies } from "next/headers";
 
 const ACCESS_COOKIE = process.env.JWT_COOKIE_NAME!; // 'cotebek_session'
@@ -52,6 +52,20 @@ export async function getCurrentUserEmail() {
       Buffer.from(payload, "base64url").toString("utf-8"),
     );
     return decoded.email ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getCurrentUserName() {
+  const token = await getStaffToken();
+  if (!token) return null;
+  try {
+    const payload = token.split(".")[1];
+    const decoded = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf-8"),
+    );
+    return decoded.name ?? null;
   } catch {
     return null;
   }

@@ -1,4 +1,4 @@
-// adminqinq/src/app/(app)/settings/page.tsx
+// coteadmin/src/app/(app)/settings/page.tsx
 import { cotebek } from '@/lib/cotebek';
 import { SettingsForm } from './SettingsForm';
 import Link from 'next/link';
@@ -11,6 +11,10 @@ type Settings = {
   business_address?: string;
   business_phone?: string;
   receipt_footer?: string; 
+  business_type?: string;
+  primary_color?: string;
+  website_url?: string;
+  dashboard_window_days?: string;
 };
 
 export default async function SettingsPage() {
@@ -33,7 +37,7 @@ export default async function SettingsPage() {
             <Store size={22} className="text-primary" aria-hidden="true" />
             Pengaturan Toko
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Konfigurasi identitas & sistem laundry.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Konfigurasi identitas & sistem usaha.</p>
         </div>
       </div>
 

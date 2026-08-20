@@ -1,0 +1,676 @@
+// coteadmin/src/app/(app)/dashboard/page.tsx
+
+import Link from 'next/link';
+import { cotebek } from '@/lib/cotebek';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  ArrowRight,
+  Activity,
+  CheckCircle2,
+  Clock3,
+  ListChecks,
+  ShoppingBag,
+  Users,
+  Wallet,
+  AlertCircle,
+  Sparkles,
+} from 'lucide-react';
+
+type Overview = {
+  ordersToday: number;
+  revenueToday: number;
+  activeOrders: number;
+  totalOrders: number;
+  totalRevenue: number;
+  totalCustomers: number;
+};
+
+type StaffDashboard = {
+  windowDays: number;
+  totalOrders: number;
+  statusBreakdown: Record<string, number>;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  RECEIVED: 'Diterima',
+  IN_PROCESS: 'Diproses',
+  READY: 'Siap Diambil',
+  DONE: 'Selesai',
+  CANCELLED: 'Dibatalkan',
+};
+
+const STATUS_CONFIG: Record<
+  string,
+  {
+    label: string;
+    icon: typeof Clock3;
+    className: string;
+    dotClassName: string;
+  }
+> = {
+  RECEIVED: {
+    label: 'Diterima',
+    icon: Clock3,
+    className: 'bg-info-subtle text-info',
+    dotClassName: 'bg-info',
+  },
+  IN_PROCESS: {
+    label: 'Diproses',
+    icon: Activity,
+    className: 'bg-warning-subtle text-warning',
+    dotClassName: 'bg-warning',
+  },
+  READY: {
+    label: 'Siap Diambil',
+    icon: CheckCircle2,
+    className: 'bg-success-subtle text-success',
+    dotClassName: 'bg-success',
+  },
+  DONE: {
+    label: 'Selesai',
+    icon: CheckCircle2,
+    className: 'bg-success-subtle text-success',
+    dotClassName: 'bg-success',
+  },
+  CANCELLED: {
+    label: 'Dibatalkan',
+    icon: AlertCircle,
+    className: 'bg-destructive-subtle text-destructive',
+    dotClassName: 'bg-destructive',
+  },
+};
+
+export default async function DashboardPage() {
+  const membership = await cotebek<{
+    data: { isMember: boolean; role: string | null };
+  }>('/auth/membership');
+
+  const role = membership.data.role;
+  const isStaffOnly = role === 'STAFF';
+
+  if (isStaffOnly) {
+    const res = await cotebek<{ data: StaffDashboard }>(
+      '/reports/staff-dashboard'
+    );
+
+    return <StaffDashboardView data={res.data} />;
+  }
+
+  const res = await cotebek<{ data: Overview }>('/reports/overview');
+
+  return <OwnerDashboardView data={res.data} />;
+}
+
+/* -------------------------------------------------------------------------- */
+/* OWNER                                                                       */
+/* -------------------------------------------------------------------------- */
+
+function OwnerDashboardView({ data: o }: { data: Overview }) {
+  return (
+    <main className="mx-auto w-full max-w-7xl px-4 py-5 pb-10 sm:px-6 lg:px-8 lg:py-7">
+      {/* Header */}
+      <header className="mb-6 lg:mb-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" />
+              Operasional aktif
+            </div>
+
+            <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Ringkasan
+            </h1>
+
+            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Pantau kondisi usaha dan order yang sedang berjalan hari ini.
+            </p>
+          </div>
+
+          <div className="hidden rounded-xl border border-border bg-card px-3 py-2 text-right shadow-sm sm:block">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              Hari ini
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-foreground">
+              Operasional
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Primary operational card */}
+      <Link
+        href="/orders"
+        className="group mb-4 block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
+        <Card className="relative overflow-hidden border-primary/20 bg-primary text-primary-foreground shadow-sm transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
+          <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-white/10 blur-2xl" />
+
+          <CardContent className="relative p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-5">
+              <div className="min-w-0">
+                <div className="mb-4 flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">
+                    <Clock3 size={18} strokeWidth={2.2} />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider opacity-80">
+                      Operasional
+                    </p>
+                    <p className="text-sm font-semibold">
+                      Order berjalan
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-end gap-3">
+                  <span className="text-4xl font-bold tracking-tight sm:text-5xl">
+                    {o.activeOrders}
+                  </span>
+
+                  <span className="mb-1.5 text-sm font-medium opacity-80">
+                    order sedang berjalan
+                  </span>
+                </div>
+
+                <p className="mt-2 max-w-md text-xs leading-relaxed opacity-75">
+                  Order yang masih membutuhkan proses atau tindakan.
+                </p>
+              </div>
+
+              <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 transition-transform duration-200 group-hover:translate-x-1">
+                <ArrowRight size={19} />
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4">
+              <span className="text-xs font-medium opacity-80">
+                Lihat semua order
+              </span>
+
+              <span className="text-xs font-semibold">
+                Buka →
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+
+      {/* Main stats */}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <StatCard
+          label="Omzet hari ini"
+          value={`Rp${o.revenueToday.toLocaleString('id-ID')}`}
+          icon={Wallet}
+          iconClassName="bg-success-subtle text-success"
+          valueClassName="text-success"
+          href={undefined}
+        />
+
+        <StatCard
+          label="Order hari ini"
+          value={o.ordersToday.toLocaleString('id-ID')}
+          icon={ShoppingBag}
+          iconClassName="bg-info-subtle text-info"
+          href={undefined}
+        />
+
+        <StatCard
+          label="Total pelanggan"
+          value={o.totalCustomers.toLocaleString('id-ID')}
+          icon={Users}
+          iconClassName="bg-primary-subtle text-primary"
+          href="/customers"
+          className="col-span-2 lg:col-span-1"
+        />
+      </section>
+
+      {/* Quick actions */}
+      <section className="mt-7">
+        <SectionHeading
+          title="Akses cepat"
+          description="Menu yang paling sering digunakan."
+        />
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <QuickAction
+            href="/orders"
+            icon={ShoppingBag}
+            label="Kelola order"
+            description="Lihat & proses"
+          />
+
+          <QuickAction
+            href="/customers"
+            icon={Users}
+            label="Pelanggan"
+            description="Data pelanggan"
+          />
+
+          <QuickAction
+            href="/orders"
+            icon={ListChecks}
+            label="Semua order"
+            description="Riwayat order"
+          />
+        </div>
+      </section>
+
+      {/* Business overview */}
+      <section className="mt-7">
+        <SectionHeading
+          title="Performa usaha"
+          description="Ringkasan akumulasi bisnis."
+        />
+
+        <Card className="overflow-hidden shadow-sm">
+          <CardContent className="p-0">
+            <OverviewRow
+              icon={Activity}
+              label="Total order"
+              value={o.totalOrders.toLocaleString('id-ID')}
+              description="Semua order tercatat"
+            />
+
+            <OverviewRow
+              icon={Wallet}
+              label="Total omzet"
+              value={`Rp${o.totalRevenue.toLocaleString('id-ID')}`}
+              description="Akumulasi pendapatan"
+              valueClassName="text-success"
+            />
+
+            <Link
+              href="/customers"
+              className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+            >
+              <OverviewRow
+                icon={Users}
+                label="Total pelanggan"
+                value={o.totalCustomers.toLocaleString('id-ID')}
+                description="Pelanggan terdaftar"
+                showArrow
+              />
+            </Link>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Tiny footer insight */}
+      <div className="mt-7 flex items-start gap-3 rounded-2xl border border-border bg-card/70 p-4">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-subtle text-primary">
+          <Sparkles size={15} />
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold text-foreground">
+            Dashboard CoTE
+          </p>
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+            Semua angka di atas mengikuti data operasional yang tercatat saat
+            ini.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* STAFF                                                                       */
+/* -------------------------------------------------------------------------- */
+
+function StaffDashboardView({ data: s }: { data: StaffDashboard }) {
+  const breakdown = s.statusBreakdown;
+
+  const orderedStatuses = [
+    'RECEIVED',
+    'IN_PROCESS',
+    'READY',
+    'DONE',
+    'CANCELLED',
+  ];
+
+  const statuses = orderedStatuses
+    .filter((status) => status in breakdown)
+    .map((status) => [status, breakdown[status]] as const);
+
+  return (
+    <main className="mx-auto w-full max-w-5xl px-4 py-5 pb-10 sm:px-6 lg:px-8 lg:py-7">
+      {/* Header */}
+      <header className="mb-6 lg:mb-8">
+        <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" />
+          Mode staff
+        </div>
+
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Ringkasan kerja
+        </h1>
+
+        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+          Pantau order dan status pekerjaan dalam {s.windowDays} hari terakhir.
+        </p>
+      </header>
+
+      {/* Main order count */}
+      <Link
+        href="/orders"
+        className="group mb-5 block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
+        <Card className="overflow-hidden border-primary/20 bg-primary text-primary-foreground shadow-sm transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
+          <CardContent className="p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider opacity-80">
+                  <ListChecks size={15} />
+                  Total order
+                </div>
+
+                <div className="flex items-end gap-3">
+                  <span className="text-4xl font-bold tracking-tight sm:text-5xl">
+                    {s.totalOrders}
+                  </span>
+
+                  <span className="mb-1.5 text-sm font-medium opacity-80">
+                    dalam {s.windowDays} hari
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 transition-transform group-hover:translate-x-1">
+                <ArrowRight size={20} />
+              </div>
+            </div>
+
+            <div className="mt-5 border-t border-white/15 pt-4 text-xs font-semibold opacity-80">
+              Lihat semua order →
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+
+      {/* Status */}
+      <section>
+        <SectionHeading
+          title="Status order"
+          description="Distribusi pekerjaan berdasarkan status."
+        />
+
+        <div className="space-y-3">
+          {statuses.map(([status, count]) => {
+            const config = STATUS_CONFIG[status];
+            const Icon = config?.icon ?? Activity;
+            const label =
+              config?.label ?? STATUS_LABEL[status] ?? status;
+
+            const percentage =
+              s.totalOrders > 0
+                ? Math.round((count / s.totalOrders) * 100)
+                : 0;
+
+            return (
+              <Card
+                key={status}
+                className="overflow-hidden shadow-sm transition-colors hover:border-border-strong"
+              >
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                        config?.className ?? 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      <Icon size={18} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {label}
+                          </p>
+
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {percentage}% dari total order
+                          </p>
+                        </div>
+
+                        <span className="text-xl font-bold tracking-tight text-foreground">
+                          {count}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            config?.dotClassName ?? 'bg-primary'
+                          }`}
+                          style={{
+                            width: `${Math.min(percentage, 100)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Staff action */}
+      <Link
+        href="/orders"
+        className="group mt-6 flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-subtle text-primary">
+            <ShoppingBag size={18} />
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              Buka daftar order
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Lanjutkan pekerjaan yang sedang berjalan.
+            </p>
+          </div>
+        </div>
+
+        <ArrowRight
+          size={18}
+          className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary"
+        />
+      </Link>
+    </main>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* COMPONENTS                                                                  */
+/* -------------------------------------------------------------------------- */
+
+function SectionHeading({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="mb-3 px-0.5">
+      <h2 className="text-sm font-semibold tracking-tight text-foreground">
+        {title}
+      </h2>
+
+      {description && (
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {description}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  iconClassName,
+  valueClassName,
+  href,
+  className = '',
+}: {
+  label: string;
+  value: string;
+  icon: typeof Wallet;
+  iconClassName?: string;
+  valueClassName?: string;
+  href?: string;
+  className?: string;
+}) {
+  const content = (
+    <Card
+      className={`h-full shadow-sm transition-all duration-200 ${
+        href
+          ? 'group cursor-pointer hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md'
+          : ''
+      } ${className}`}
+    >
+      <CardContent className="p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div
+            className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+              iconClassName ?? 'bg-muted text-muted-foreground'
+            }`}
+          >
+            <Icon size={17} />
+          </div>
+
+          {href && (
+            <ArrowRight
+              size={15}
+              className="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+            />
+          )}
+        </div>
+
+        <p className="mt-4 text-xs font-medium text-muted-foreground">
+          {label}
+        </p>
+
+        <p
+          className={`mt-1 truncate text-xl font-bold tracking-tight sm:text-2xl ${
+            valueClassName ?? 'text-foreground'
+          }`}
+        >
+          {value}
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  if (!href) {
+    return content;
+  }
+
+  return (
+    <Link
+      href={href}
+      className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
+      {content}
+    </Link>
+  );
+}
+
+function QuickAction({
+  href,
+  icon: Icon,
+  label,
+  description,
+}: {
+  href: string;
+  icon: typeof ShoppingBag;
+  label: string;
+  description: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
+      <Card className="h-full shadow-sm transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md">
+        <CardContent className="flex items-center gap-3 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-subtle text-primary transition-transform group-hover:scale-105">
+            <Icon size={18} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-foreground">
+              {label}
+            </p>
+
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              {description}
+            </p>
+          </div>
+
+          <ArrowRight
+            size={15}
+            className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+          />
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+function OverviewRow({
+  icon: Icon,
+  label,
+  value,
+  description,
+  valueClassName,
+  showArrow = false,
+}: {
+  icon: typeof Activity;
+  label: string;
+  value: string;
+  description: string;
+  valueClassName?: string;
+  showArrow?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3 border-b border-border p-4 last:border-b-0 sm:p-5">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+        <Icon size={17} />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span
+          className={`text-base font-bold tracking-tight ${
+            valueClassName ?? 'text-foreground'
+          }`}
+        >
+          {value}
+        </span>
+
+        {showArrow && (
+          <ArrowRight
+            size={15}
+            className="text-muted-foreground transition-transform group-hover:translate-x-0.5"
+          />
+        )}
+      </div>
+    </div>
+  );
+}

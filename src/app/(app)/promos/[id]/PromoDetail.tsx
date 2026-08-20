@@ -3,6 +3,12 @@
 
 import { useState } from 'react';
 import { updatePromo, togglePromoActive } from './actions';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Loader2 } from 'lucide-react';
 
 type Promo = {
   id: string; name: string; code: string | null;
@@ -29,8 +35,7 @@ export function PromoDetail({ promo }: { promo: Promo }) {
     else setSaved(true);
   }
 
-  async function handleToggle() {
-    const next = !isActive;
+  async function handleToggle(next: boolean) {
     setTogglePending(true);
     const result = await togglePromoActive(promo.id, next);
     setTogglePending(false);
@@ -40,71 +45,76 @@ export function PromoDetail({ promo }: { promo: Promo }) {
 
   return (
     <div className="space-y-4">
-      <div className="border rounded-lg p-3 flex justify-between items-center">
-        <div>
-          <div className="font-medium text-sm">Status Promo</div>
-          <div className="text-xs text-gray-500">{isActive ? 'Aktif — bisa dipakai customer' : 'Nonaktif — gak bisa dipakai'}</div>
-        </div>
-        <button
-          onClick={handleToggle}
-          disabled={togglePending}
-          className={`w-12 h-7 rounded-full relative transition-colors ${isActive ? 'bg-green-600' : 'bg-gray-300'} disabled:opacity-50`}
-        >
-          <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform ${isActive ? 'translate-x-5' : ''}`} />
-        </button>
-      </div>
+      <Card className="shadow-sm">
+        <CardContent className="p-3 flex justify-between items-center">
+          <div>
+            <div className="font-medium text-sm text-foreground">Status Promo</div>
+            <div className="text-xs text-muted-foreground">{isActive ? 'Aktif — bisa dipakai customer' : 'Nonaktif — gak bisa dipakai'}</div>
+          </div>
+          <Switch checked={isActive} onCheckedChange={handleToggle} disabled={togglePending} />
+        </CardContent>
+      </Card>
 
       {promo.code && (
-        <div className="border rounded-lg p-3 text-sm">
-          <div className="text-gray-500 text-xs mb-1">Kode</div>
-          <div className="font-mono font-medium">{promo.code}</div>
-        </div>
+        <Card className="shadow-sm">
+          <CardContent className="p-3 text-sm">
+            <div className="text-muted-foreground text-xs mb-1">Kode</div>
+            <div className="font-mono font-medium text-foreground">{promo.code}</div>
+          </CardContent>
+        </Card>
       )}
 
       {promo.usageLimit && (
-        <div className="border rounded-lg p-3 text-sm flex justify-between">
-          <span className="text-gray-500">Pemakaian</span>
-          <span className="font-medium">{promo.usageCount} / {promo.usageLimit}</span>
-        </div>
+        <Card className="shadow-sm">
+          <CardContent className="p-3 text-sm flex justify-between">
+            <span className="text-muted-foreground">Pemakaian</span>
+            <span className="font-medium text-foreground">{promo.usageCount} / {promo.usageLimit}</span>
+          </CardContent>
+        </Card>
       )}
 
-      <form action={handleSubmit} className="space-y-4">
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Nama Promo</label>
-          <input name="name" required defaultValue={promo.name} className="w-full border rounded-lg p-2.5" />
-        </div>
-        <div>
-          <label className="text-sm text-gray-600 block mb-1">Nilai {promo.type === 'PERCENTAGE' ? '(%)' : '(Rp)'}</label>
-          <input name="value" type="number" min="0" defaultValue={promo.value} className="w-full border rounded-lg p-2.5" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-sm text-gray-600 block mb-1">Min. Belanja</label>
-            <input name="minOrder" type="number" min="0" defaultValue={promo.minOrder ?? ''} className="w-full border rounded-lg p-2.5" />
-          </div>
-          <div>
-            <label className="text-sm text-gray-600 block mb-1">Maks. Diskon</label>
-            <input name="maxDiscount" type="number" min="0" defaultValue={promo.maxDiscount ?? ''} className="w-full border rounded-lg p-2.5" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-sm text-gray-600 block mb-1">Limit Total</label>
-            <input name="usageLimit" type="number" min="1" defaultValue={promo.usageLimit ?? ''} className="w-full border rounded-lg p-2.5" />
-          </div>
-          <div>
-            <label className="text-sm text-gray-600 block mb-1">Limit / Pelanggan</label>
-            <input name="maxUsagePerCustomer" type="number" min="1" defaultValue={promo.maxUsagePerCustomer ?? ''} className="w-full border rounded-lg p-2.5" />
-          </div>
-        </div>
+      <Card className="shadow-sm">
+        <CardContent className="p-4">
+          <form action={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nama Promo</Label>
+              <Input id="name" name="name" required defaultValue={promo.name} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="value">Nilai {promo.type === 'PERCENTAGE' ? '(%)' : '(Rp)'}</Label>
+              <Input id="value" name="value" type="number" min="0" defaultValue={promo.value} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="minOrder">Min. Belanja</Label>
+                <Input id="minOrder" name="minOrder" type="number" min="0" defaultValue={promo.minOrder ?? ''} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxDiscount">Maks. Diskon</Label>
+                <Input id="maxDiscount" name="maxDiscount" type="number" min="0" defaultValue={promo.maxDiscount ?? ''} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="usageLimit">Limit Total</Label>
+                <Input id="usageLimit" name="usageLimit" type="number" min="1" defaultValue={promo.usageLimit ?? ''} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxUsagePerCustomer">Limit / Pelanggan</Label>
+                <Input id="maxUsagePerCustomer" name="maxUsagePerCustomer" type="number" min="1" defaultValue={promo.maxUsagePerCustomer ?? ''} />
+              </div>
+            </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        {saved && !error && <p className="text-sm text-green-600">Tersimpan.</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            {saved && !error && <p className="text-sm text-success">Tersimpan.</p>}
 
-        <button type="submit" disabled={pending} className="w-full bg-black text-white rounded-lg p-3 font-medium disabled:opacity-50">
-          {pending ? 'Menyimpan...' : 'Simpan Perubahan'}
-        </button>
-      </form>
+            <Button type="submit" disabled={pending} className="w-full h-11 font-medium">
+              {pending && <Loader2 size={16} className="mr-2 animate-spin" />}
+              {pending ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

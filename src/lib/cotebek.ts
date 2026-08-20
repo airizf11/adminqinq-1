@@ -1,4 +1,5 @@
-// adminqinq/src/lib/cotebek.ts
+// coteadmin/src/lib/cotebek.ts
+import { headers as getRequestHeaders } from "next/headers";
 import { getStaffToken } from "./session";
 
 const BASE_URL = process.env.COTEBEK_API_URL!;
@@ -16,20 +17,28 @@ export async function cotebek<T = unknown>(
 ): Promise<T> {
   const { method = "GET", body, requireAuth = true } = opts;
 
-  const headers: Record<string, string> = {
+  const incomingHeaders = await getRequestHeaders();
+  const forwardedFor = incomingHeaders.get("x-forwarded-for");
+  const realIp =
+    forwardedFor?.split(",")[0]?.trim() ??
+    incomingHeaders.get("x-real-ip") ??
+    null;
+
+  const requestHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     "x-api-key": API_KEY,
+    ...(realIp ? { "x-forwarded-for": realIp } : {}),
   };
 
   if (requireAuth) {
     const token = await getStaffToken();
     if (!token) throw new Error("UNAUTHENTICATED");
-    headers["Authorization"] = `Bearer ${token}`;
+    requestHeaders["Authorization"] = `Bearer ${token}`;
   }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
-    headers,
+    headers: requestHeaders,
     body: body ? JSON.stringify(body) : undefined,
     cache: "no-store",
   });

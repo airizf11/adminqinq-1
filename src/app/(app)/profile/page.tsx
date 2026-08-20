@@ -1,23 +1,27 @@
 // adminqinq/src/app/(app)/profile/page.tsx
 import { getCurrentUserEmail } from '@/lib/session';
 import { logout } from './actions';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default async function ProfilePage() {
   const email = await getCurrentUserEmail();
 
   return (
     <div className="p-4">
-      <h1 className="text-lg font-semibold mb-4">Profil</h1>
+      <h1 className="text-lg font-semibold text-foreground mb-4">Profil</h1>
 
-      <div className="border rounded-lg p-3 mb-6">
-        <div className="text-xs text-gray-500">Login sebagai</div>
-        <div className="font-medium">{email ?? 'Tidak diketahui'}</div>
-      </div>
+      <Card className="shadow-sm mb-6">
+        <CardContent className="p-3">
+          <div className="text-xs text-muted-foreground">Login sebagai</div>
+          <div className="font-medium text-foreground">{email ?? 'Tidak diketahui'}</div>
+        </CardContent>
+      </Card>
 
       <form action={logout}>
-        <button type="submit" className="w-full border border-red-500 text-red-500 rounded-lg p-3 font-medium">
+        <Button type="submit" variant="outline" className="w-full h-11 font-medium border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive">
           Keluar
-        </button>
+        </Button>
       </form>
     </div>
   );

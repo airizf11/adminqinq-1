@@ -55,7 +55,21 @@ export default async function TransactionsPage({
   if (params.endDate) qs.set('endDate', params.endDate);
   if (params.type) qs.set('type', params.type);
 
-  const res = await cotebek<TransactionsResponse>(`/transactions${qs.toString() ? `?${qs}` : ''}`);
+  let res: TransactionsResponse;
+  try {
+    res = await cotebek<TransactionsResponse>(`/transactions${qs.toString() ? `?${qs}` : ''}`);
+  } catch {
+    return (
+      <div className="p-4 flex flex-col items-center justify-center text-center py-16">
+        <p className="text-sm text-muted-foreground max-w-[240px]">
+          Riwayat transaksi cuma bisa dilihat Admin/Owner. Kamu tetap bisa catat transaksi baru.
+        </p>
+        <Link href="/new/tx" className={cn(buttonVariants({ size: 'sm' }), 'mt-4')}>
+          + Catat Transaksi
+        </Link>
+      </div>
+    );
+  }
   const { data } = res;
   const { summary } = res.meta;
 
@@ -66,10 +80,10 @@ export default async function TransactionsPage({
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-heading font-bold text-primary tracking-tight">Transaksi</h1>
-          <p className="text-sm text-muted-foreground mt-1">Pantau arus kas laundry-mu.</p>
+          <p className="text-sm text-muted-foreground mt-1">Pantau arus kas usahamu.</p>
         </div>
         <Link 
-          href="/transactions/new" 
+          href="/new/tx" 
           className={cn(
             buttonVariants({ size: "sm" }), 
             "rounded-full shadow-md shrink-0 flex items-center gap-1 whitespace-nowrap"
@@ -82,13 +96,13 @@ export default async function TransactionsPage({
       {/* 2. RINGKASAN SALDO (SUMMARY CARDS) */}
       <div className="grid grid-cols-3 gap-2" aria-label="Ringkasan Keuangan">
         {/* Pemasukan */}
-        <Card className="shadow-sm border-emerald-200 bg-emerald-50/10">
+        <Card className="shadow-sm border-success/30 bg-success/5">
           <CardContent className="p-3 flex flex-col items-center text-center gap-1">
-            <div className="p-1.5 bg-emerald-100 rounded-full text-emerald-600 mb-1" aria-hidden="true">
+            <div className="p-1.5 bg-success/10 rounded-full text-success mb-1" aria-hidden="true">
               <TrendingUp size={16} />
             </div>
             <div className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">Masuk</div>
-            <div className="text-sm font-bold text-emerald-600 truncate w-full" title={`Rp${summary.totalIn.toLocaleString('id-ID')}`}>
+            <div className="text-sm font-bold text-success truncate w-full" title={`Rp${summary.totalIn.toLocaleString('id-ID')}`}>
               <span className="sr-only">Total Pemasukan: </span>
               Rp{summary.totalIn.toLocaleString('id-ID')}
             </div>
@@ -148,8 +162,13 @@ export default async function TransactionsPage({
 
           return (
             <li key={tx.id}>
-              <Card className="shadow-sm border-border hover:shadow-md transition-all duration-200">
-                <CardContent className="p-3.5 flex justify-between items-start gap-3">
+              <Card className="relative shadow-sm border-border hover:shadow-md transition-all duration-200">
+                <Link
+                  href={`/transactions/${tx.id}`}
+                  className="absolute inset-0 z-0 rounded-xl"
+                  aria-label={`Lihat detail transaksi ${tx.description || catLabel}`}
+                />
+                <CardContent className="relative z-10 pointer-events-none p-3.5 flex justify-between items-start gap-3">
                   
                   {/* Bagian Kiri: Ikon & Detail Teks */}
                   <div className="flex items-start gap-3 overflow-hidden mt-0.5">
@@ -157,7 +176,7 @@ export default async function TransactionsPage({
                     <div 
                       className={cn(
                         "p-2.5 rounded-full shrink-0", 
-                        isIncome ? "bg-emerald-100 text-emerald-600" : "bg-destructive/10 text-destructive"
+                        isIncome ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                       )}
                       aria-hidden="true"
                     >
@@ -189,7 +208,7 @@ export default async function TransactionsPage({
                     <div 
                       className={cn(
                         "text-sm font-bold", 
-                        isIncome ? "text-emerald-600" : "text-destructive"
+                        isIncome ? "text-success" : "text-destructive"
                       )}
                     >
                       <span className="sr-only">{isIncome ? 'Pemasukan sebesar' : 'Pengeluaran sebesar'}</span>
@@ -198,12 +217,12 @@ export default async function TransactionsPage({
 
                     {/* Tampilan Fee Admin Opsional */}
                     {tx.fee != null && tx.fee > 0 && (
-                      <div className="text-[10px] text-orange-500 font-medium mt-0.5" aria-label={`Dipotong biaya admin Rp${tx.fee}`}>
+                      <div className="text-[10px] text-warning font-medium mt-0.5" aria-label={`Dipotong biaya admin Rp${tx.fee}`}>
                         Fee: Rp{tx.fee.toLocaleString('id-ID')}
                       </div>
                     )}
                     
-                    <div className="flex items-center justify-end gap-1.5 mt-1.5">
+                    <div className="flex items-center justify-end gap-1.5 mt-1.5 pointer-events-auto relative z-20">
                      {tx.paymentStatus === 'UNPAID' && (
                        <MarkPaidInline id={tx.id} />
                      )}

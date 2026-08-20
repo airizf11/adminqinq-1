@@ -1,0 +1,82 @@
+// coteadmin/src/app/(app)/reports/advanced/ExportButton.tsx
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { FileSpreadsheet, Loader2 } from 'lucide-react';
+
+type Summary = { revenue: number; cogs: number; grossProfit: number; totalOrders: number };
+type TopItem = { itemName: string; totalSold: number };
+type TrendPoint = { date: string; revenue: number; profit: number };
+type PaymentMethodStat = { method: string; count: number; percentage: string };
+type PromoBudget = { totalDiscount: number; ordersWithPromo: number; discountPercentage: string };
+type NetProfit = { revenue: number; cogs: number; grossProfit: number; operatingExpense: number; netProfit: number };
+type ExpenseByCategory = { category: string; total: number; count: number };
+
+type ExportData = {
+  startDate: string;
+  endDate: string;
+  summary: Summary;
+  topItems: TopItem[];
+  trend: TrendPoint[];
+  payments: PaymentMethodStat[];
+  promo: PromoBudget;
+  netProfit: NetProfit;
+  expenseByCategory: ExpenseByCategory[];
+  businessName: string;
+};
+
+export function ExportButton(data: ExportData) {
+  const [pending, setPending] = useState(false);
+
+  async function handleExport() {
+    setPending(true);
+    try {
+      const XLSX = await import('xlsx');
+      const wb = XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
+        { Metrik: 'Omzet', Nilai: data.summary.revenue },
+        { Metrik: 'Modal (COGS)', Nilai: data.summary.cogs },
+        { Metrik: 'Laba Kotor', Nilai: data.summary.grossProfit },
+        { Metrik: 'Total Order', Nilai: data.summary.totalOrders },
+        { Metrik: 'Biaya Operasional', Nilai: data.netProfit.operatingExpense },
+        { Metrik: 'Laba Bersih', Nilai: data.netProfit.netProfit },
+      ]), 'Ringkasan');
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+        data.trend.map((t) => ({ Tanggal: t.date, Omzet: t.revenue, Laba: t.profit }))
+      ), 'Tren Harian');
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+        data.payments.map((p) => ({ Metode: p.method, Jumlah: p.count, Persentase: p.percentage }))
+      ), 'Metode Bayar');
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+        data.topItems.map((i, idx) => ({ Peringkat: idx + 1, Item: i.itemName, Terjual: i.totalSold }))
+      ), 'Item Terlaris');
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+        data.expenseByCategory.map((e) => ({ Kategori: e.category, Total: e.total, Jumlah_Transaksi: e.count }))
+      ), 'Pengeluaran');
+
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
+        { Metrik: 'Total Diskon', Nilai: data.promo.totalDiscount },
+        { Metrik: 'Order Pakai Promo', Nilai: data.promo.ordersWithPromo },
+        { Metrik: 'Persentase dari Omzet', Nilai: data.promo.discountPercentage },
+      ]), 'Promo');
+
+      const filename = `Laporan_${data.businessName.replace(/\s+/g, '_')}_${data.startDate}_${data.endDate}.xlsx`;
+      XLSX.writeFile(wb, filename);
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <Button onClick={handleExport} disabled={pending} variant="outline" size="sm" className="gap-2 cursor-pointer">
+      {pending ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} />}
+      {pending ? 'Menyiapkan...' : 'Export Excel'}
+    </Button>
+  );
+}
