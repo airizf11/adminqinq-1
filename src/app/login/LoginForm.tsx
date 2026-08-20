@@ -1,6 +1,4 @@
 // coteadmin/src/app/login/LoginForm.tsx
-// coteadmin/src/app/login/LoginForm.tsx
-
 'use client';
 
 import { GoogleLogin } from '@react-oauth/google';
